@@ -1,25 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Sparkles } from 'lucide-react';
-import { createPageUrl } from '../utils';
 import { useTheme } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
 
 const navLinks = [
-  { name: 'Home', path: 'Home' },
-  { name: 'Features', path: 'Features' },
-  { name: 'How It Works', path: 'HowItWorks' },
-  { name: 'About', path: 'About' },
-  { name: 'Dashboard', path: 'Dashboard' },
-  { name: 'Contact', path: 'Contact' },
+  { name: 'Home', path: '/' },
+  { name: 'Features', path: '/features' },
+  { name: 'How It Works', path: '/how-it-works' },
+  { name: 'About', path: '/about' },
+  { name: 'Dashboard', path: '/dashboard' },
+  { name: 'Contact', path: '/contact' },
 ];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { isDark } = useTheme();
-  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,10 +26,7 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isActive = (path) => {
-    const currentPath = location.pathname.replace('/', '');
-    return currentPath === path || (currentPath === '' && path === 'Home');
-  };
+  const isActive = (path) => window.location.pathname === path;
 
   return (
     <motion.nav
@@ -48,9 +42,10 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
+          
           {/* Logo */}
-          <Link to={createPageUrl('Home')}>
-            <motion.div 
+          <a href="/">
+            <motion.div
               className="flex items-center gap-2"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -58,20 +53,18 @@ export default function Navbar() {
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
                 <Sparkles className="w-6 h-6 text-white" />
               </div>
-              <span className={`text-xl font-bold ${
-                isDark ? 'text-white' : 'text-slate-800'
-              }`}>
+              <span className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>
                 Aura<span className="text-indigo-500">AI</span>
               </span>
             </motion.div>
-          </Link>
+          </a>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
-              <Link key={link.path} to={createPageUrl(link.path)}>
+              <a key={link.path} href={link.path}>
                 <motion.div
-                  className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                  className={`relative px-4 py-2 rounded-xl text-sm font-medium ${
                     isActive(link.path)
                       ? isDark
                         ? 'text-white'
@@ -92,20 +85,16 @@ export default function Navbar() {
                     />
                   )}
                 </motion.div>
-              </Link>
+              </a>
             ))}
           </div>
 
           {/* Right Side */}
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            
-            {/* Mobile Menu Button */}
             <motion.button
               onClick={() => setIsOpen(!isOpen)}
-              className={`lg:hidden p-2 rounded-xl ${
-                isDark ? 'text-white' : 'text-slate-800'
-              }`}
+              className={`lg:hidden p-2 rounded-xl ${isDark ? 'text-white' : 'text-slate-800'}`}
               whileTap={{ scale: 0.9 }}
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -121,11 +110,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className={`lg:hidden overflow-hidden ${
-              isDark
-                ? 'bg-slate-900/95 backdrop-blur-xl'
-                : 'bg-white/95 backdrop-blur-xl'
-            }`}
+            className={`lg:hidden ${isDark ? 'bg-slate-900/95' : 'bg-white/95'} backdrop-blur-xl`}
           >
             <div className="px-4 py-6 space-y-2">
               {navLinks.map((link, index) => (
@@ -135,11 +120,8 @@ export default function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <Link
-                    to={createPageUrl(link.path)}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <div className={`block px-4 py-3 rounded-xl text-lg font-medium ${
+                  <a href={link.path} onClick={() => setIsOpen(false)}>
+                    <div className={`px-4 py-3 rounded-xl text-lg font-medium ${
                       isActive(link.path)
                         ? 'bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-500'
                         : isDark
@@ -148,7 +130,7 @@ export default function Navbar() {
                     }`}>
                       {link.name}
                     </div>
-                  </Link>
+                  </a>
                 </motion.div>
               ))}
             </div>

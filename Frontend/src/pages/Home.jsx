@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Play, Calendar, CheckCircle2, Clock, Sparkles, Zap, Brain } from 'lucide-react';
 import GradientBackground from '../components/GradientBackground';
 import AnimatedSection from '../components/AnimatedSection';
-import CTAButton from '../components/CTAButton';
+// import button from '../components/button';
 import FeatureCard from '../components/FeatureCard';
 import { useTheme } from '../components/ThemeContext';
 
@@ -206,12 +206,12 @@ export default function Home() {
                 transition={{ delay: 0.3 }}
                 className="flex flex-wrap gap-4"
               >
-                <CTAButton to="Input" icon={ArrowRight}>
+                <button to="Input" icon={ArrowRight}>
                   Start Planning Your Day
-                </CTAButton>
-                <CTAButton to="HowItWorks" variant="outline" icon={Play}>
+                </button>
+                <button to="HowItWorks" variant="outline" icon={Play}>
                   See How It Works
-                </CTAButton>
+                </button>
               </motion.div>
 
               {/* Quick Highlights */}
@@ -297,9 +297,9 @@ export default function Home() {
           </div>
 
           <AnimatedSection className="text-center mt-12">
-            <CTAButton to="Features" variant="outline">
+            <button to="Features" variant="outline">
               Explore All Features
-            </CTAButton>
+            </button>
           </AnimatedSection>
         </div>
       </section>
@@ -322,9 +322,9 @@ export default function Home() {
                   Join thousands of professionals who've reclaimed their time 
                   and reduced daily stress with AuraAI.
                 </p>
-                <CTAButton to="Dashboard" variant="secondary" icon={ArrowRight}>
+                <button to="Dashboard" variant="secondary" icon={ArrowRight}>
                   Get Started for Free
-                </CTAButton>
+                </button>
               </div>
             </div>
           </AnimatedSection>
