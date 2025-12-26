@@ -15,7 +15,7 @@ const steps = [
     number: '01',
     icon: MessageSquare,
     title: 'Speak or Type Freely',
-    description: 'Tell AuraAI about your tasks in natural language. No forms, no structure needed — just express what you need to do.',
+    description: 'Tell ClarityAI about your tasks in natural language. No forms, no structure needed — just express what you need to do.',
     example: '"I need to finish the report, call Sarah, and prepare for tomorrow\'s presentation"',
     color: 'indigo',
   },
@@ -221,7 +221,7 @@ const { isDark } = useTheme();
                 isDark ? 'text-slate-300' : 'text-slate-600'
               }`}
             >
-              AuraAI makes planning effortless. Here's exactly how your 
+              ClarityAI makes planning effortless. Here's exactly how your 
               words transform into a perfectly organized day.
             </motion.p>
           </div>

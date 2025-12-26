@@ -31,7 +31,7 @@ export default function About() {
     {
       icon: Brain,
       title: 'AI That Understands You',
-      description: 'Speak naturally about your day. AuraAI comprehends context, priorities, and preferences just like a real assistant would.',
+      description: 'Speak naturally about your day. ClarityAI comprehends context, priorities, and preferences just like a real assistant would.',
     },
     {
       icon: Sparkles,
@@ -86,7 +86,7 @@ export default function About() {
               transition={{ delay: 0.2 }}
               className="text-xl leading-relaxed text-slate-600"
             >
-              AuraAI was born from a simple observation: brilliant people 
+              ClarityAI was born from a simple observation: brilliant people 
               spend too much energy managing their schedules instead of 
               doing what they do best.
             </motion.p>
@@ -138,7 +138,7 @@ export default function About() {
               How AI Removes the Stress
             </h2>
             <p className="text-lg max-w-2xl mx-auto text-slate-600">
-              AuraAI handles the mental load of planning, so you can focus on what truly matters.
+              ClarityAI handles the mental load of planning, so you can focus on what truly matters.
             </p>
           </AnimatedSection>
 

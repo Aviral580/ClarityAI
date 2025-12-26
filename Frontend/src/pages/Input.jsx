@@ -70,7 +70,7 @@ export default function Input() {
           <p className={`text-lg ${
             isDark ? 'text-slate-300' : 'text-slate-600'
           }`}>
-            Speak or type naturally — AuraAI will understand and schedule for you.
+            Speak or type naturally — ClarityAI will understand and schedule for you.
           </p>
         </AnimatedSection>
 

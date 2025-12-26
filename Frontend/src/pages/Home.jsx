@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Play, Calendar, CheckCircle2, Clock, Sparkles, Zap, Brain } from 'lucide-react';
 import GradientBackground from '../components/GradientBackground';
 import AnimatedSection from '../components/AnimatedSection';
-// import button from '../components/button';
+import CTAButton from '../components/CTAButton';
 import FeatureCard from '../components/FeatureCard';
 import { useTheme } from '../components/ThemeContext';
 
@@ -195,7 +195,7 @@ export default function Home() {
                   isDark ? 'text-slate-300' : 'text-slate-600'
                 }`}
               >
-                Just tell AuraAI what you need to do — in your own words. 
+                Just tell ClarityAI what you need to do — in your own words. 
                 Watch as your perfect schedule creates itself, giving you 
                 back hours of precious time every day.
               </motion.p>
@@ -206,12 +206,12 @@ export default function Home() {
                 transition={{ delay: 0.3 }}
                 className="flex flex-wrap gap-4"
               >
-                <button to="Input" icon={ArrowRight}>
+                <CTAButton to="Input" icon={ArrowRight}>
                   Start Planning Your Day
-                </button>
-                <button to="HowItWorks" variant="outline" icon={Play}>
+                </CTAButton>
+                <CTAButton to="HowItWorks" variant="outline" icon={Play}>
                   See How It Works
-                </button>
+                </CTAButton>
               </motion.div>
 
               {/* Quick Highlights */}
@@ -270,7 +270,7 @@ export default function Home() {
             <p className={`text-xl max-w-2xl mx-auto ${
               isDark ? 'text-slate-400' : 'text-slate-600'
             }`}>
-              AuraAI combines powerful AI with intuitive design to make 
+              ClarityAI combines powerful AI with intuitive design to make 
               daily planning effortless and actually enjoyable.
             </p>
           </AnimatedSection>
@@ -297,9 +297,9 @@ export default function Home() {
           </div>
 
           <AnimatedSection className="text-center mt-12">
-            <button to="Features" variant="outline">
+            <CTAButton to="Features" variant="outline">
               Explore All Features
-            </button>
+            </CTAButton>
           </AnimatedSection>
         </div>
       </section>
@@ -320,11 +320,11 @@ export default function Home() {
                 </h2>
                 <p className="text-xl text-white/80 max-w-2xl mx-auto mb-10">
                   Join thousands of professionals who've reclaimed their time 
-                  and reduced daily stress with AuraAI.
+                  and reduced daily stress with ClarityAI.
                 </p>
-                <button to="Dashboard" variant="secondary" icon={ArrowRight}>
+                <CTAButton to="Dashboard" variant="secondary" icon={ArrowRight}>
                   Get Started for Free
-                </button>
+                </CTAButton>
               </div>
             </div>
           </AnimatedSection>

@@ -15,7 +15,7 @@ export default function Features() {
     {
       icon: MessageSquare,
       title: 'Natural Language Understanding',
-      description: 'Type or speak in your own words. Say "meeting with John tomorrow after lunch" and AuraAI knows exactly what you mean.',
+      description: 'Type or speak in your own words. Say "meeting with John tomorrow after lunch" and ClarityAI knows exactly what you mean.',
     },
     {
       icon: Mic,
@@ -122,7 +122,7 @@ export default function Features() {
                 isDark ? 'text-slate-300' : 'text-slate-600'
               }`}
             >
-              Discover how AuraAI's intelligent features work together 
+              Discover how ClarityAI's intelligent features work together 
               to streamline your daily planning and boost productivity.
             </motion.p>
           </div>
@@ -184,7 +184,7 @@ export default function Features() {
               <p className={`text-lg mb-6 ${
                 isDark ? 'text-slate-300' : 'text-slate-600'
               }`}>
-                Forget rigid forms and dropdown menus. With AuraAI, you communicate 
+                Forget rigid forms and dropdown menus. With ClarityAI, you communicate 
                 the way you think. Our AI understands context, time references, 
                 and even casual phrasing.
               </p>

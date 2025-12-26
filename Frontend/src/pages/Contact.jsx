@@ -35,18 +35,18 @@ export default function Contact() {
     { icon: Twitter, label: 'Twitter', href: '#', color: 'from-blue-400 to-blue-500' },
     { icon: Github, label: 'GitHub', href: '#', color: 'from-slate-700 to-slate-800' },
     { icon: Linkedin, label: 'LinkedIn', href: '#', color: 'from-blue-600 to-blue-700' },
-    { icon: Mail, label: 'Email', href: 'mailto:hello@auraai.com', color: 'from-indigo-500 to-purple-600' },
+    { icon: Mail, label: 'Email', href: 'mailto:hello@ClarityAI.com', color: 'from-indigo-500 to-purple-600' },
   ];
 
   const contactInfo = [
-    { icon: Mail, label: 'Email', value: 'hello@auraai.com' },
-    { icon: Phone, label: 'Phone', value: '+1 (555) 123-4567' },
-    { icon: MapPin, label: 'Location', value: 'San Francisco, CA' },
+    { icon: Mail, label: 'Email', value: 'hello@ClarityAI.com' },
+    { icon: Phone, label: 'Phone', value: '+91 ---------' },
+    { icon: MapPin, label: 'Location', value: 'MNNIT ALLAHABAD' },
   ];
 
   return (
     <GradientBackground variant="primary">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Header */}
         <AnimatedSection className="text-center mb-16">
           <motion.div

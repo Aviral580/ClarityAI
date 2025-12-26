@@ -87,7 +87,7 @@ export default function Settings() {
               <p className={`text-sm ${
                 isDark ? 'text-slate-400' : 'text-slate-500'
               }`}>
-                Customize your AuraAI experience
+                Customize your ClarityAI experience
               </p>
             </div>
           </div>
