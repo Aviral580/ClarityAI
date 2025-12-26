@@ -1,46 +1,70 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 
-export default function CalendarToolbar(toolbar) {
-    const goToBack = () => {
-        toolbar.onNavigate('PREV');
-    };
+export default function CalendarToolbar({ isDark, onNavigate, onView, view, label }) {
 
-    const goToNext = () => {
-        toolbar.onNavigate('NEXT');
-    };
+    // Define styles based on isDark directly
+    const containerClass = isDark
+        ? 'bg-slate-800 border-white/10 text-white'
+        : 'bg-slate-100 border-slate-200 text-slate-700';
 
-    const goToCurrent = () => {
-        toolbar.onNavigate('TODAY');
-    };
-
-    const label = () => {
-        const date = moment(toolbar.date);
-        return (
-            <span className="text-xl font-bold dark:text-white text-slate-800">
-                {date.format('MMMM YYYY')}
-            </span>
-        );
-    };
-
-    // Helper for date libraries
-    const moment = require('moment');
+    const buttonBaseClass = "transition-all rounded-md flex items-center justify-center";
+    const buttonHoverClass = isDark ? 'hover:bg-white/10' : 'hover:bg-white hover:shadow-sm';
+    const iconColor = isDark ? 'text-slate-300' : 'text-slate-600';
 
     return (
-        <div className="flex items-center justify-between mb-6 px-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 p-2">
+
+            {/* LEFT: Navigation */}
             <div className="flex items-center gap-4">
-                {label()}
-                <div className="flex bg-slate-100 dark:bg-white/10 rounded-lg p-1">
-                    <button onClick={goToBack} className="p-1 hover:bg-white dark:hover:bg-white/10 rounded-md transition"><ChevronLeft size={20} className="dark:text-white" /></button>
-                    <button onClick={goToCurrent} className="px-3 text-sm font-medium dark:text-white">Today</button>
-                    <button onClick={goToNext} className="p-1 hover:bg-white dark:hover:bg-white/10 rounded-md transition"><ChevronRight size={20} className="dark:text-white" /></button>
+                <div className={`flex items-center p-1 rounded-lg border ${containerClass}`}>
+                    <button
+                        onClick={() => onNavigate('PREV')}
+                        className={`p-1.5 ${buttonBaseClass} ${buttonHoverClass}`}
+                    >
+                        <ChevronLeft size={18} className={iconColor} />
+                    </button>
+
+                    <button
+                        onClick={() => onNavigate('TODAY')}
+                        className={`px-3 py-1 text-sm font-bold mx-1 ${buttonBaseClass} ${buttonHoverClass} ${isDark ? 'text-white' : 'text-slate-800'}`}
+                    >
+                        Today
+                    </button>
+
+                    <button
+                        onClick={() => onNavigate('NEXT')}
+                        className={`p-1.5 ${buttonBaseClass} ${buttonHoverClass}`}
+                    >
+                        <ChevronRight size={18} className={iconColor} />
+                    </button>
                 </div>
+
+                <h2 className={`text-xl font-bold flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                    <CalendarIcon size={20} className="text-indigo-500 hidden sm:block" />
+                    <span>{label}</span>
+                </h2>
             </div>
 
-            <div className="flex bg-slate-100 dark:bg-white/10 rounded-lg p-1 text-sm font-medium">
-                <button onClick={() => toolbar.onView('day')} className={`px-4 py-1.5 rounded-md transition ${toolbar.view === 'day' ? 'bg-white shadow-sm dark:text-slate-900' : 'text-slate-500 dark:text-slate-300'}`}>Day</button>
-                <button onClick={() => toolbar.onView('week')} className={`px-4 py-1.5 rounded-md transition ${toolbar.view === 'week' ? 'bg-white shadow-sm dark:text-slate-900' : 'text-slate-500 dark:text-slate-300'}`}>Week</button>
-                <button onClick={() => toolbar.onView('month')} className={`px-4 py-1.5 rounded-md transition ${toolbar.view === 'week' ? 'bg-white shadow-sm dark:text-slate-900' : 'text-slate-500 dark:text-slate-300'}`}>Month</button>
+            {/* RIGHT: View Switcher */}
+            <div className={`flex p-1 rounded-lg border ${containerClass}`}>
+                {['month', 'week', 'day'].map((v) => {
+                    const isActive = view === v;
+                    const activeClass = isDark
+                        ? 'bg-slate-600 text-white shadow-sm ring-1 ring-white/10'
+                        : 'bg-white text-indigo-600 shadow-sm ring-1 ring-black/5';
+                    const inactiveClass = isDark ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-700';
+
+                    return (
+                        <button
+                            key={v}
+                            onClick={() => onView(v)}
+                            className={`px-4 py-1.5 rounded-md text-sm font-semibold capitalize transition-all ${isActive ? activeClass : inactiveClass}`}
+                        >
+                            {v}
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );
