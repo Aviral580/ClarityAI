@@ -1,0 +1,26 @@
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+@import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
+
+/* --- Modern Styling Overrides --- */
+
+/* Remove default gray backgrounds and borders */
+.rbc-calendar { font-family: inherit; }
+.rbc-header { @apply py-3 font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-white/10; }
+.rbc-time-header-content { border-left: none; }
+.rbc-time-view { @apply border-none; }
+.rbc-day-slot .rbc-time-slot { @apply border-t border-gray-100 dark:border-white/5; }
+.rbc-timeslot-group { @apply border-b border-gray-100 dark:border-white/5; }
+.rbc-day-bg { @apply border-l border-gray-100 dark:border-white/5; }
+
+/* Today Column Highlight */
+.rbc-today { @apply bg-indigo-50/30 dark:bg-indigo-900/10; }
+
+/* Hide uglier default elements */
+.rbc-time-gutter .rbc-timeslot-group { @apply border-none; }
+.rbc-label { @apply text-xs font-medium text-gray-400 dark:text-gray-500 px-2; }
+.rbc-current-time-indicator { @apply h-[2px] bg-red-500; }
+
+/* Event Styling handled in component, reset default */
+.rbc-event { 
+  @apply bg-transparent p-0 border-none outline-none focus:outline-none; 
+}
