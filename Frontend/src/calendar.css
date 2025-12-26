@@ -1,0 +1,54 @@
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+@import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
+
+/* --- RESET & FONTS --- */
+.rbc-calendar { font-family: inherit; }
+
+/* --- HEADER ALIGNMENT FIX (WEEK VIEW) --- */
+.rbc-time-header-content {
+  border-left: none;
+  margin-left: 0 !important; /* Forces alignment */
+}
+.rbc-time-header-cell {
+  min-height: auto !important; /* Prevents height glitches */
+  padding-bottom: 0;
+}
+.rbc-header {
+  border-bottom: none !important; /* We handle border in JS/Tailwind */
+  text-transform: uppercase;
+  font-size: 15px; /* text-xs */
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* --- GRID LINE ADJUSTMENTS --- */
+.rbc-timeslot-group {
+  min-height: 60px; /* Consistent slot height */
+}
+
+/* Remove default heavy borders */
+.rbc-time-view { 
+  border: none; 
+}
+.rbc-month-view { 
+  border: none; 
+}
+
+/* --- MONTH VIEW FIXES --- */
+/* This prevents the white background on off-range dates */
+.rbc-off-range-bg {
+  background: transparent !important; 
+}
+.rbc-day-bg {
+  background: transparent !important;
+}
+
+/* --- EVENTS --- */
+.rbc-event { 
+  background: rgb(47, 122, 236); 
+  padding: 0; 
+  border: none; 
+  outline: none; 
+  box-shadow: none; 
+}
+.rbc-event:focus { outline: none; }

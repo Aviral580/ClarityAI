@@ -10,7 +10,7 @@ import About from './pages/About';
 import Features from './pages/Features';
 import HowItWorks from './pages/HowItWorks';
 import Dashboard from './pages/Dashboard';
-import Calendar from './pages/Calendar';
+import Calendar from './pages/CalendarPage';
 import Input from './pages/Input';
 import Summary from './pages/Summary';
 import Settings from './pages/Settings';
