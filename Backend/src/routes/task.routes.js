@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyJWT } from "../middlewares/auth.middleware.js"; // Assumes you have this
+import { protect } from '../middlewares/auth.js';
 import {
     getTasks,
     createTask,
@@ -10,7 +10,7 @@ import {
 const router = Router();
 
 // Apply Auth Middleware to all task routes
-router.use(verifyJWT);
+router.use(protect);
 
 // Route: /api/v1/tasks
 router.route("/")
