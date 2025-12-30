@@ -15,6 +15,8 @@ import Input from './pages/Input';
 import Summary from './pages/Summary';
 import Settings from './pages/Settings';
 import Contact from './pages/Contact';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 export default function App() {
   const NAVBAR_HEIGHT = 80; // same height as Navbar (h-20)
@@ -32,6 +34,8 @@ export default function App() {
       <main className="flex-1 ">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/about" element={<About />} />
           <Route path="/features" element={<Features />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
