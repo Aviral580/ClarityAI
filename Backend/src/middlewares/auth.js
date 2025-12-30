@@ -3,8 +3,6 @@ import { User } from "../models/User.js";
 
 export const protect = async (req, res, next) => {
     try {
-        // 1. Look for token in cookies (populated by cookie-parser)
-        // We also check headers as a backup for flexibility
         const token = req.cookies?.accessToken || req.header('Authorization')?.split(' ')[1];
 
         if (!token) {

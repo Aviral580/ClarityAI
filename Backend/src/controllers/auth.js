@@ -13,18 +13,9 @@ const generateAccessAndRefreshTokens = async (userId) => {
       console.log("User not found in DB");
       throw new ApiError(404, "User not found");
     }
-
-    // Call the methods defined in your userSchema
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
-
-    // Attach the refresh token to the user document
     user.refreshToken = refreshToken;
-
-    /** * CRITICAL: validateBeforeSave: false only skips Schema validation.
-     * It STILL runs the pre-save hooks.
-     * Ensure your pre-save hook has the 'isModified' check!
-     */
     await user.save({ validateBeforeSave: false });
 
     return { accessToken, refreshToken };

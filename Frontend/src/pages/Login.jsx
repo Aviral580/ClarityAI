@@ -1,12 +1,11 @@
-import React, { useState } from "react"; // Added useState
-import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence
-import { Mail, Lock, ArrowRight, Github, Loader2 } from "lucide-react"; // Added Loader2
-import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
+import React, { useState } from "react"; 
+import { motion, AnimatePresence } from "framer-motion"; 
+import { Mail, Lock, ArrowRight, Github, Loader2 } from "lucide-react"; 
+import { Link } from "react-router-dom"; 
 import { useTheme } from "../components/ThemeContext";
 
 export default function Login() {
   const { isDark } = useTheme();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", msg: "" });
 
@@ -14,8 +13,6 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setFeedback({ type: "", msg: "" });
-
-    // Construct data matching your backend loginUser requirements
     const formData = {
       identifier: e.target.identifier.value,
       password: e.target.password.value,
@@ -39,7 +36,7 @@ export default function Login() {
           msg: result.message || "Login Successful!",
         });
 
-        // Wait 3 seconds then redirect
+     
         setTimeout(() => {
         window.location.href = '/dashboard';
         }, 3000);

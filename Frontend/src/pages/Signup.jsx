@@ -1,7 +1,7 @@
-import React, { useState } from "react"; // Added useState
-import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence
-import { Mail, Lock, CheckCircle2, Sparkles, Loader2 } from "lucide-react"; // Added Loader2
-import { Link, useNavigate } from "react-router-dom"; // Added useNavigate
+import React, { useState } from "react"; 
+import { motion, AnimatePresence } from "framer-motion"; 
+import { Mail, Lock, CheckCircle2, Sparkles, Loader2 } from "lucide-react"; 
+import { Link, useNavigate } from "react-router-dom"; 
 import { useTheme } from "../components/ThemeContext";
 
 export default function Signup() {
@@ -15,7 +15,6 @@ export default function Signup() {
     setLoading(true);
     setFeedback({ type: "", msg: "" });
 
-    // Constructing data matching your backend requirements
     const formData = {
       username: e.target.username.value.toLowerCase(),
       email: e.target.email.value,
@@ -60,11 +59,11 @@ export default function Signup() {
         isDark ? "bg-slate-950" : "bg-white"
       }`}
     >
-      {/* Left Side: Visual/Branding (Hidden on mobile) */}
+     
       <div className="hidden lg:flex w-1/2 bg-indigo-600 relative overflow-hidden flex-col justify-center px-20">
         <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-indigo-600 to-purple-700" />
 
-        {/* Animated Shapes */}
+       
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}

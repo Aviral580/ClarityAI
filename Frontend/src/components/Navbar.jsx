@@ -31,12 +31,12 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      // Call your backend logout endpoint
+     
       await fetch('http://localhost:5000/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
       });
-      setUser(null); // Clear local user state
+      setUser(null); 
       navigate('/login');
     } catch (error) {
       console.error("Logout failed", error);
@@ -60,7 +60,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
-          {/* Logo */}
+         
           <Link to="/">
             <motion.div className="flex items-center gap-2" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -96,12 +96,12 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Right Section: Auth & Toggle */}
+
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-4 mr-2">
               
               {user ? (
-                /* --- LOGGED IN STATE --- */
+                 
                 <div className="flex items-center gap-4">
                   <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${isDark ? 'border-white/10 text-slate-300' : 'border-slate-200 text-slate-600'}`}>
                     <UserIcon className="w-4 h-4 text-indigo-500" />
@@ -119,7 +119,7 @@ export default function Navbar() {
                   </motion.button>
                 </div>
               ) : (
-                /* --- LOGGED OUT STATE --- */
+              
                 <>
                   <Link to="/login">
                     <motion.button
