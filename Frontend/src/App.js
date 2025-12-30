@@ -1,6 +1,10 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
+// Context & Protection
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
@@ -15,36 +19,49 @@ import Input from './pages/Input';
 import Summary from './pages/Summary';
 import Settings from './pages/Settings';
 import Contact from './pages/Contact';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 export default function App() {
-  const NAVBAR_HEIGHT = 80; // same height as Navbar (h-20)
-
   return (
-    <div className="min-h-screen flex flex-col">
+    
+      <div className="min-h-screen flex flex-col">
 
-      {/* Navbar */}
-      <Navbar />
+            <AuthProvider>
+            <Navbar />
+        {/* Page Content */}
+        <main className="flex-1">
+          <Routes>
+            {/* --- Public Routes --- */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/features" element={<Features />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+            <Route path="/contact" element={<Contact />} />
+           
+            {/* --- Protected Routes (Require Login Cookies) --- */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute> <Dashboard /> </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+              <ProtectedRoute> <Calendar /> </ProtectedRoute>
+            } />
+            <Route path="/input" element={
+              <ProtectedRoute> <Input /> </ProtectedRoute>
+            } />
+            <Route path="/summary" element={
+              <ProtectedRoute> <Summary /> </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute> <Settings /> </ProtectedRoute>
+            } />
+          </Routes>
+        </main>
+            </AuthProvider>
 
-      {/* Spacer to push content below fixed navbar */}
-      {/* <div style={{ height: NAVBAR_HEIGHT }} /> */}
-
-      {/* Page Content */}
-      <main className="flex-1 ">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/input" element={<Input />} />
-          <Route path="/summary" element={<Summary />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/contact" element={<Contact />} />
-        </Routes>
-      </main>
-
-      <Footer />
-    </div>
+        <Footer />
+      </div>
   );
 }

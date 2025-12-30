@@ -1,5 +1,6 @@
 import express from 'express';
-import { registerUser, loginUser , refreshAccessToken} from '../controllers/auth.js';
+import { registerUser, loginUser , refreshAccessToken, getUser, logoutUser} from '../controllers/auth.js';
+import { protect } from '../middlewares/auth.js';
 
 const router = express.Router();
 
@@ -8,6 +9,8 @@ const router = express.Router();
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/refresh', refreshAccessToken);
+router.post('/user', protect, getUser);
+router.post('/logout', protect, logoutUser)
 
 
 
