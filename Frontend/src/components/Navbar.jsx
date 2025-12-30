@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sparkles, LogIn, UserPlus } from 'lucide-react'; // Added icons
+import { Menu, X, Sparkles, } from 'lucide-react'; // Added icons
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from './ThemeContext';
 import ThemeToggle from './ThemeToggle';
