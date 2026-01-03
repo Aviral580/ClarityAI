@@ -12,3 +12,23 @@ export const checkConflicts = async (userId, startTime, endTime) => {
 
     return overlappingTask;
 };
+
+export const saveAiTasks = async (userId, aiTasks, originalCommand) => {
+    const savedTasks = [];
+    
+    for (const taskData of aiTasks) {
+        const newTask = await Task.create({
+            userId,
+            title: taskData.title,
+            category: taskData.category,
+            priority: taskData.priority,
+            startTime: taskData.startTime,
+            endTime: taskData.endTime,
+            isFixed: taskData.isFixed,
+            originalCommand: originalCommand
+        });
+        savedTasks.push(newTask);
+    }
+    
+    return savedTasks;
+};
