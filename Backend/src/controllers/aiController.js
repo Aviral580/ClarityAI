@@ -1,13 +1,13 @@
 import { analyzeUserCommand } from "../services/aiService.js";
 import { User } from "../models/User.js";
-import { asyncHandler } from "../utils/AsyncHandler.js"; // Using your existing utils
+import { checkConflicts, saveAiTasks } from "../services/scheduler.js";
+import { asyncHandler } from "../utils/AsyncHandler.js"; 
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const processCommand = asyncHandler(async (req, res) => {
   const { command, localTime } = req.body;
-  const userId = req.user._id; // Assumes your auth middleware adds user to req
+  const userId = req.user._id;
 
-  // 1. Fetch User Context for the AI
   const user = await User.findById(userId);
 
   const userContext = {
@@ -17,11 +17,36 @@ export const processCommand = asyncHandler(async (req, res) => {
     categoryDurations: user.learningMetrics?.categoryDurations
   };
 
-  // 2. Call the AI Brain
   const aiResponse = await analyzeUserCommand(command, userContext);
 
-  // 3. Return the AI's structured plan (Backend logic for saving to DB comes next)
+  if (aiResponse.intent === "ADD_TASK") {
+    for (const task of aiResponse.tasks) {
+      const conflict = await checkConflicts(userId, task.startTime, task.endTime);
+      
+      if (conflict) {
+        return res.status(200).json(
+          new ApiResponse(200, {
+            actionRequired: "CONFLICT",
+            conflictWith: conflict.title,
+            message: `Conflict detected with ${conflict.title}`,
+            aiInterpretation: aiResponse
+          }, "Conflict detected")
+        );
+      }
+    }
+
+    const savedTasks = await saveAiTasks(userId, aiResponse.tasks, command);
+    
+    return res.status(200).json(
+      new ApiResponse(200, {
+        actionRequired: "NONE",
+        tasks: savedTasks,
+        message: aiResponse.responseMessage
+      }, "Tasks scheduled successfully")
+    );
+  }
+
   return res.status(200).json(
-    new ApiResponse(200, aiResponse, "Command processed successfully")
+    new ApiResponse(200, aiResponse, "Command processed")
   );
 });
