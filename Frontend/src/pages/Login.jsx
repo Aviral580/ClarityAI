@@ -34,14 +34,14 @@ export default function Login() {
       const result = await response.json();
 
       if (response.ok) {
-        // ✅ 1. SAVE TOKEN TO LOCAL STORAGE
-        // Your backend returns: { data: { accessToken: "..." }, message: "..." }
-        if (result.data && result.data.accessToken) {
-          localStorage.setItem("accessToken", result.data.accessToken);
+        // // ✅ 1. SAVE TOKEN TO LOCAL STORAGE
+        // // Your backend returns: { data: { accessToken: "..." }, message: "..." }
+        // if (result.data && result.data.accessToken) {
+        //   localStorage.setItem("accessToken", result.data.accessToken);
 
-          // Optional: Save user details too if you want to display name immediately
-          // localStorage.setItem("user", JSON.stringify(result.data.user)); 
-        }
+        //   // Optional: Save user details too if you want to display name immediately
+        //   // localStorage.setItem("user", JSON.stringify(result.data.user)); 
+        // }
 
         setFeedback({
           type: "success",

@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/refresh', refreshAccessToken);
-router.post('/user', protect, getUser);
+router.get('/user', protect, getUser);
 router.post('/logout', protect, logoutUser)
 router.put("/onboarding", protect, updateOnboarding);
 
