@@ -9,11 +9,7 @@ export const AuthProvider = ({ children }) => {
 
     const checkAuth = async () => {
         try {
-            // We use apiClient.get instead of fetch.
-            // It automatically handles the cookies and refresh logic.
             
-            // NOTE: Assuming your route to get user details is GET /auth/user
-            // If your backend route is different, update this URL.
             const response = await apiClient.get('/auth/user'); 
             
             if (response.data && response.data.data) {

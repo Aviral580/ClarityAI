@@ -32,7 +32,7 @@ apiClient.interceptors.response.use(
             } catch (refreshError) {
                 // If refresh fails (e.g., refresh token is also expired), force logout
                 console.error("Session expired:", refreshError);
-                window.location.href = '/login'; 
+                // window.location.href = '/login'; 
                 return Promise.reject(refreshError);
             }
         }
