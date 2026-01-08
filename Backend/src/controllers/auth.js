@@ -146,7 +146,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken;
+  // FIX 1: req.cookies (plural)
+  const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
   if (!incomingRefreshToken) {
     throw new ApiError(401, "unauthorised request");
@@ -172,7 +173,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       secure: true,
     };
 
-    const { accessToken, newRefreshToken } =
+    // FIX 2: Rename refreshToken to newRefreshToken during destructuring
+    const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshTokens(user._id);
 
     return res
@@ -228,11 +230,43 @@ const changePassword = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid old password");
   }
   user.password = newPassword;
-  await user.save({ validBeforeSave: false });
+  
+  // FIX: validateBeforeSave (not validBeforeSave)
+  await user.save({ validateBeforeSave: false });
 
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "Password changed successfully"));
+});
+
+const updateOnboarding = asyncHandler(async (req, res) => {
+  const { onboardingData } = req.body;
+  const userId = req.user._id; // Coming from 'protect' middleware
+
+  // Validate if data exists
+  if (!onboardingData) {
+      throw new ApiError(400, "Onboarding data is missing");
+  }
+
+  // Update User: Save info AND set isOnboarded to true
+  const user = await User.findByIdAndUpdate(
+      userId,
+      {
+          $set: {
+              onboardingData: onboardingData,
+              isOnboarded: true
+          }
+      },
+      { new: true } // Return the updated document
+  ).select("-password -refreshToken"); // Don't send back sensitive info
+
+  if (!user) {
+      throw new ApiError(404, "User not found");
+  }
+
+  return res
+      .status(200)
+      .json(new ApiResponse(200, user, "Onboarding completed successfully"));
 });
 
 export {
@@ -244,4 +278,5 @@ export {
   getUser,
   updateAddress,
   changePassword,
+  updateOnboarding,
 };

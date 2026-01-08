@@ -21,45 +21,50 @@ import Settings from './pages/Settings';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import OnboardingPage from './pages/OnboardingPage'; // 1. Import Onboarding Page
 
 export default function App() {
   return (
-    
       <div className="min-h-screen flex flex-col">
 
-            <AuthProvider>
+        <AuthProvider>
             <Navbar />
-        {/* Page Content */}
-        <main className="flex-1">
-          <Routes>
-            {/* --- Public Routes --- */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/how-it-works" element={<HowItWorks />} />
-            <Route path="/contact" element={<Contact />} />
-           
-            {/* --- Protected Routes (Require Login Cookies) --- */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute> <Dashboard /> </ProtectedRoute>
-            } />
-            <Route path="/calendar" element={
-              <ProtectedRoute> <Calendar /> </ProtectedRoute>
-            } />
-            <Route path="/input" element={
-              <ProtectedRoute> <Input /> </ProtectedRoute>
-            } />
-            <Route path="/summary" element={
-              <ProtectedRoute> <Summary /> </ProtectedRoute>
-            } />
-            <Route path="/settings" element={
-              <ProtectedRoute> <Settings /> </ProtectedRoute>
-            } />
-          </Routes>
-        </main>
-            </AuthProvider>
+            {/* Page Content */}
+            <main className="flex-1">
+              <Routes>
+                {/* --- Public Routes --- */}
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/features" element={<Features />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/contact" element={<Contact />} />
+                {/* --- Protected Routes (Require Login Cookies) --- */}
+                
+                {/* 2. Add Onboarding Route (Must be Protected) */}
+                <Route path="/onboarding" element={
+                  <ProtectedRoute> <OnboardingPage /> </ProtectedRoute>
+                } />
+
+                <Route path="/dashboard" element={
+                  <ProtectedRoute> <Dashboard /> </ProtectedRoute>
+                } />
+                <Route path="/calendar" element={
+                  <ProtectedRoute> <Calendar /> </ProtectedRoute>
+                } />
+                <Route path="/input" element={
+                  <ProtectedRoute> <Input /> </ProtectedRoute>
+                } />
+                <Route path="/summary" element={
+                  <ProtectedRoute> <Summary /> </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute> <Settings /> </ProtectedRoute>
+                } />
+              </Routes>
+            </main>
+        </AuthProvider>
 
         <Footer />
       </div>

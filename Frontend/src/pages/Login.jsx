@@ -1,13 +1,15 @@
-import React, { useState } from "react"; 
-import { motion, AnimatePresence } from "framer-motion"; 
-import { Mail, Lock, ArrowRight, Github, Loader2 } from "lucide-react"; 
-import { Link } from "react-router-dom"; 
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Lock, ArrowRight, Github, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useTheme } from "../components/ThemeContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const { isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", msg: "" });
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ export default function Login() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", 
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
@@ -35,10 +37,10 @@ export default function Login() {
         // ✅ 1. SAVE TOKEN TO LOCAL STORAGE
         // Your backend returns: { data: { accessToken: "..." }, message: "..." }
         if (result.data && result.data.accessToken) {
-            localStorage.setItem("accessToken", result.data.accessToken);
-            
-            // Optional: Save user details too if you want to display name immediately
-            // localStorage.setItem("user", JSON.stringify(result.data.user)); 
+          localStorage.setItem("accessToken", result.data.accessToken);
+
+          // Optional: Save user details too if you want to display name immediately
+          // localStorage.setItem("user", JSON.stringify(result.data.user)); 
         }
 
         setFeedback({
@@ -48,9 +50,18 @@ export default function Login() {
 
         // ✅ 2. REDIRECT
         setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1500); 
-        
+          // Check the user object returned from backend
+          const user = result.data.user;
+
+          if (user.isOnboarded) {
+            // User has finished setup -> Go to App
+            navigate('/dashboard'); // Using React Router's navigate instead of window.location
+          } else {
+            // User is new -> Go to Onboarding
+            navigate('/onboarding');
+          }
+        }, 1500);
+
       } else {
         setFeedback({
           type: "error",
@@ -67,9 +78,8 @@ export default function Login() {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-500 ${
-        isDark ? "bg-slate-950" : "bg-slate-50"
-      }`}
+      className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-500 ${isDark ? "bg-slate-950" : "bg-slate-50"
+        }`}
     >
       {/* Background Decorative Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -84,17 +94,15 @@ export default function Login() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className={`relative w-full max-w-md p-8 rounded-3xl border shadow-2xl backdrop-blur-sm ${
-          isDark
+        className={`relative w-full max-w-md p-8 rounded-3xl border shadow-2xl backdrop-blur-sm ${isDark
             ? "bg-slate-900/50 border-white/10"
             : "bg-white border-slate-200"
-        }`}
+          }`}
       >
         <div className="text-center mb-8">
           <h1
-            className={`text-3xl font-bold mb-2 ${
-              isDark ? "text-white" : "text-slate-900"
-            }`}
+            className={`text-3xl font-bold mb-2 ${isDark ? "text-white" : "text-slate-900"
+              }`}
           >
             Welcome Back
           </h1>
@@ -110,11 +118,10 @@ export default function Login() {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className={`mb-6 p-4 rounded-xl text-center text-sm font-bold border ${
-                feedback.type === "success"
+              className={`mb-6 p-4 rounded-xl text-center text-sm font-bold border ${feedback.type === "success"
                   ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                   : "bg-rose-500/10 border-rose-500/20 text-rose-500"
-              }`}
+                }`}
             >
               {feedback.msg} {feedback.type === "success" && "Redirecting..."}
             </motion.div>
@@ -124,9 +131,8 @@ export default function Login() {
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
             <label
-              className={`block text-sm font-medium mb-2 ${
-                isDark ? "text-slate-300" : "text-slate-700"
-              }`}
+              className={`block text-sm font-medium mb-2 ${isDark ? "text-slate-300" : "text-slate-700"
+                }`}
             >
               Email Address or Username
             </label>
@@ -136,11 +142,10 @@ export default function Login() {
                 name="identifier" // Matches 'identifier' in your backend code
                 required
                 type="text"
-                className={`w-full pl-11 pr-4 py-3 rounded-xl border outline-none transition-all ${
-                  isDark
+                className={`w-full pl-11 pr-4 py-3 rounded-xl border outline-none transition-all ${isDark
                     ? "bg-slate-800/50 border-slate-700 focus:border-indigo-500 text-white"
                     : "bg-slate-50 border-slate-200 focus:border-indigo-500"
-                }`}
+                  }`}
                 placeholder="name@company.com"
               />
             </div>
@@ -149,9 +154,8 @@ export default function Login() {
           <div>
             <div className="flex justify-between mb-2">
               <label
-                className={`text-sm font-medium ${
-                  isDark ? "text-slate-300" : "text-slate-700"
-                }`}
+                className={`text-sm font-medium ${isDark ? "text-slate-300" : "text-slate-700"
+                  }`}
               >
                 Password
               </label>
@@ -165,11 +169,10 @@ export default function Login() {
                 name="password" // Matches 'password' in your backend code
                 required
                 type="password"
-                className={`w-full pl-11 pr-4 py-3 rounded-xl border outline-none transition-all ${
-                  isDark
+                className={`w-full pl-11 pr-4 py-3 rounded-xl border outline-none transition-all ${isDark
                     ? "bg-slate-800/50 border-slate-700 focus:border-indigo-500 text-white"
                     : "bg-slate-50 border-slate-200 focus:border-indigo-500"
-                }`}
+                  }`}
                 placeholder="••••••••"
               />
             </div>
@@ -193,27 +196,24 @@ export default function Login() {
         <div className="mt-8">
           <div className="relative flex items-center justify-center mb-6">
             <div
-              className={`w-full border-t ${
-                isDark ? "border-slate-700" : "border-slate-200"
-              }`}
+              className={`w-full border-t ${isDark ? "border-slate-700" : "border-slate-200"
+                }`}
             />
             <span
-              className={`absolute px-4 text-sm ${
-                isDark
+              className={`absolute px-4 text-sm ${isDark
                   ? "bg-slate-900 text-slate-500"
                   : "bg-white text-slate-400"
-              }`}
+                }`}
             >
               Or continue with
             </span>
           </div>
 
           <button
-            className={`w-full py-3 rounded-xl border flex items-center justify-center gap-3 font-medium transition-colors ${
-              isDark
+            className={`w-full py-3 rounded-xl border flex items-center justify-center gap-3 font-medium transition-colors ${isDark
                 ? "border-slate-700 text-white hover:bg-slate-800"
                 : "border-slate-200 text-slate-700 hover:bg-slate-50"
-            }`}
+              }`}
           >
             <Github className="w-5 h-5" />
             GitHub
@@ -221,9 +221,8 @@ export default function Login() {
         </div>
 
         <p
-          className={`mt-8 text-center text-sm ${
-            isDark ? "text-slate-400" : "text-slate-600"
-          }`}
+          className={`mt-8 text-center text-sm ${isDark ? "text-slate-400" : "text-slate-600"
+            }`}
         >
           Don't have an account?{" "}
           <Link
