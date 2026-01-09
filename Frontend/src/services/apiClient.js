@@ -10,29 +10,49 @@ const apiClient = axios.create({
 
 // Response Interceptor: Handles 401 Errors (Token Expiry)
 apiClient.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+    (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
-        // If error is 401 and we haven't retried yet
-        if (error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true; // Mark as retried to avoid infinite loops
+        // 1. Check if it's a 401 error
+        if (error.response?.status === 401) {
+
+            // 2. CRITICAL FIX: If the URL that failed was ALREADY '/refresh', stop the loop.
+            // This means your refresh token is dead. You must log out.
+            if (originalRequest.url.includes('/refresh') || originalRequest._retry) {
+                // Clear local storage
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken'); // If you store it there
+
+                // Redirect to login
+                window.location.href = '/login';
+                return Promise.reject(error);
+            }
+
+            // 3. Mark this request as "retried" so we don't do it twice
+            originalRequest._retry = true;
 
             try {
-                // 1. Call the Refresh Token Endpoint
-                // The browser automatically sends the 'refreshToken' cookie here
-                await apiClient.post('/auth/refresh');
+                // Attempt to refresh
+                const response = await axios.post('http://localhost:5000/api/auth/refresh', {
+                    // pass refresh token if needed, or rely on cookies
+                });
 
-                // 2. If successful, the backend set a new 'accessToken' cookie.
-                // Now retry the original request
+                const { accessToken } = response.data;
+
+                // Save new token
+                localStorage.setItem('accessToken', accessToken);
+
+                // Update header and retry original request
+                apiClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+                originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+
                 return apiClient(originalRequest);
-                
+
             } catch (refreshError) {
-                // If refresh fails (e.g., refresh token is also expired), force logout
-                console.error("Session expired:", refreshError);
-                // window.location.href = '/login'; 
+                // If refresh fails, redirect to login
+                console.error("Refresh failed:", refreshError);
+                localStorage.removeItem('accessToken');
                 return Promise.reject(refreshError);
             }
         }
