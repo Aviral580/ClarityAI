@@ -1,37 +1,31 @@
-import jwt from 'jsonwebtoken';
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
+import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 
-export const protect = async (req, res, next) => {
+export const verifyJWT = asyncHandler(async(req, _, next) => {
     try {
-        const token = req.cookies?.accessToken || req.header('Authorization')?.split(' ')[1];
-
+        // 1. Get token from header or cookie
+        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
+        
         if (!token) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'No token, authorization denied' 
-            });
+            throw new ApiError(401, "Unauthorized request: No token provided");
         }
 
-        // 2. Verify the token using your Secret Key
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        // 2. Decode token
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-        // 3. Find the user and attach to the request
-        // Using .select("-password") ensures sensitive data isn't passed around
-        const user = await User.findById(decoded?._id).select("-password -refreshToken");
+        // 3. Find user in DB (Critical: Exclude password/refresh token)
+        const user = await User.findById(decodedToken?._id || decodedToken?.id).select("-password -refreshToken");
 
         if (!user) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'User no longer exists' 
-            });
+            throw new ApiError(401, "Invalid Access Token: User not found");
         }
 
-        req.user = user; 
+        // 4. Attach user to request object
+        req.user = user;
         next();
-    } catch (err) {
-        return res.status(401).json({ 
-            success: false, 
-            message: 'Token is not valid or expired' 
-        });
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid access token");
     }
-};
+});

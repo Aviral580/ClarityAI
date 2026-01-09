@@ -15,15 +15,15 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 //routes
-import userRouter from './routes/auth.js'
-import taskRouter from './routes/task.routes.js'
+import userRouter from './routes/auth.js';
+import aiRouter from './routes/aiRoutes.js';
 
 //declaration of routes
-app.use("/api/auth",userRouter)
-app.use("/api/tasks",taskRouter)
+app.use("/api/auth",userRouter);
+app.use("/api/v1/ai", aiRouter);
 
 app.use((err,_, res, next) => {
-  console.error("🔥 Error Handler:", err);
+  console.error(" Error Handler:", err);
 
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
