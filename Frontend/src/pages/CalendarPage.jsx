@@ -17,14 +17,19 @@ const DnDCalendar = withDragAndDrop(Calendar);
 /* Helper: Translate MongoDB Data -> Calendar Data                            */
 /* -------------------------------------------------------------------------- */
 const formatTaskForCalendar = (task) => {
-  // Backend stores Priority as Number (1,2,3), Frontend uses String ('high', etc)
   const pMap = { 1: 'high', 2: 'medium', 3: 'low' };
 
+  // 🔴 CRITICAL FIX: Strip the 'Z' to treat time as "Floating/Local"
+  // DB: "2026-01-09T17:00:00.000Z" -> becomes "2026-01-09T17:00:00.000"
+  // Browser parses this as 5:00 PM Local Time (ignoring the +5:30 offset logic)
+  const startString = task.start ? new Date(task.start).toISOString().replace("Z", "") : null;
+  const endString = task.end ? new Date(task.end).toISOString().replace("Z", "") : null;
+
   return {
-    id: task._id, // Mongo uses _id
+    id: task._id, 
     title: task.title,
-    start: new Date(task.start), // Ensure it's a Date object
-    end: new Date(task.end),
+    start: new Date(startString), 
+    end: new Date(endString),     
     resource: {
       priority: pMap[task.priority] || 'medium',
       category: task.category || 'work',
@@ -154,40 +159,41 @@ export default function CalendarPage() {
   // 4. SAVE (CREATE or EDIT via Modal)
   const handleSave = async (data) => {
     try {
-      // Prepare the payload for Backend
-      const datePart = moment(data.date).format('YYYY-MM-DD');
-      const timePart = data.time || "09:00";
-      const start = new Date(`${datePart}T${timePart}:00`);
-
-      // Add duration (hours from modal -> minutes for backend)
+      // 🔴 CRITICAL FIX: Force the string to look like UTC
+      // Input: Date="2026-01-09", Time="17:00"
+      // We manually attach ".000Z" so MongoDB saves exactly "17:00:00Z"
+      // This matches your AI's data format.
+      const startISO = `${data.date}T${data.time}:00.000Z`;
+      const start = new Date(startISO); // This object technically holds 10:30PM IST, but the ISO string is 17:00Z
+  
+      // Calculate End Time manually to preserve this format
       const durationMinutes = parseFloat(data.duration) * 60;
-      const end = moment(start).add(durationMinutes, 'minutes').toDate();
-
-      // Map Priority String (Modal) -> Number (Backend)
+      // Get the timestamp of our "fake UTC" start and add minutes
+      const endTimestamp = new Date(startISO).getTime() + (durationMinutes * 60000); 
+      const end = new Date(endTimestamp); 
+  
       const pMapReverse = { 'high': 1, 'medium': 2, 'low': 3 };
-
+  
       const payload = {
         title: data.title,
         duration: durationMinutes,
         priority: pMapReverse[data.priority] || 2,
         category: data.category,
-        start: start,
-        end: end,
+        start: start, // Sends 17:00Z
+        end: end,     // Sends 18:00Z
         status: "scheduled",
         description: data.description || "" 
       };
-
+  
       if (data.id) {
-        // Edit Mode
         await taskService.updateTask(data.id, payload);
       } else {
-        // Create Mode
         await taskService.createTask(payload);
       }
-
+  
       setIsOpen(false);
-      fetchEvents(); // Refresh data from server
-
+      fetchEvents(); 
+  
     } catch (error) {
       console.error("Save failed:", error);
       alert("Failed to save task. Check console.");
@@ -228,6 +234,16 @@ export default function CalendarPage() {
       backgroundColor: 'transparent'
     },
   }), [isDark]);
+  
+  const handleDelete = async (taskId) => {
+    try {
+        await taskService.deleteTask(taskId); // Assumes you have this in taskService
+        setIsOpen(false);
+        fetchEvents(); // Refresh calendar
+    } catch (error) {
+        console.error("Delete failed:", error);
+    }
+};
 
   const dayPropGetter = useCallback((date) => {
     const isToday = moment(date).isSame(moment(), 'day');
@@ -281,6 +297,7 @@ export default function CalendarPage() {
         onClose={() => setIsOpen(false)}
         initialData={selectedSlot}
         onSave={handleSave}
+        onDelete={handleDelete}
       />
     </div>
   );

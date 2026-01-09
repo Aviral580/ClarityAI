@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, AlignLeft, Flag, Calendar as CalendarIcon, AlertCircle } from 'lucide-react';
+import { X, Clock, AlignLeft, Flag, Calendar as CalendarIcon, AlertCircle, Trash2 } from 'lucide-react';
 import { useTheme } from './ThemeContext';
 
-export default function AddTaskModal({ isOpen, onClose, onSave, initialData }) {
+export default function AddTaskModal({ isOpen, onClose, onSave, onDelete, initialData }) {
     const { isDark } = useTheme();
 
     // 🔴 FIX: Use Local Time instead of UTC (toISOString)
@@ -72,6 +72,16 @@ export default function AddTaskModal({ isOpen, onClose, onSave, initialData }) {
         e.preventDefault();
         onSave(formData);
         onClose();
+    };
+
+    // ✅ NEW: Handle Delete Action
+    const handleDelete = () => {
+        if (initialData?.id && onDelete) {
+            if (window.confirm("Are you sure you want to delete this task?")) {
+                onDelete(initialData.id);
+                onClose();
+            }
+        }
     };
 
     if (!isOpen) return null;
@@ -190,9 +200,25 @@ export default function AddTaskModal({ isOpen, onClose, onSave, initialData }) {
                             </div>
                         </div>
 
-                        <button type="submit" className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all active:scale-95">
-                            Save Task
-                        </button>
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 pt-2">
+                            {/* ✅ Show Delete button ONLY if editing (has ID) */}
+                            {initialData?.id && (
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    className="p-3 rounded-xl bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 border border-rose-500/20 transition-all active:scale-95 flex items-center justify-center"
+                                    title="Delete Task"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            )}
+
+                            <button type="submit" className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all active:scale-95">
+                                Save Task
+                            </button>
+                        </div>
+
                     </form>
                 </motion.div>
             </div>

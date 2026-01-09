@@ -19,5 +19,10 @@ export const taskService = {
     updateTask: async (id, updates) => {
         const response = await apiClient.put(`/tasks/${id}`, updates);
         return response.data;
-    }
+    },
+
+        deleteTask: async (taskId) => {
+            // Sends DELETE request to: http://localhost:5000/api/tasks/:id
+            return await apiClient.delete(`/tasks/${taskId}`);
+        }
 };
