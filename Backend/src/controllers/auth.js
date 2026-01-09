@@ -149,11 +149,11 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   // FIX 1: req.cookies (plural)
-  const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+  const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
 
-  if (!incomingRefreshToken) {
-    throw new ApiError(401, "unauthorised request");
-  }
+    if (!incomingRefreshToken) {
+        throw new ApiError(401, "Unauthorized request: No token provided");
+    }
   try {
     const decodedToken = jwt.verify(
       incomingRefreshToken,

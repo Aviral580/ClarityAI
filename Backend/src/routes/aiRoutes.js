@@ -6,6 +6,6 @@ const router = Router();
 
 // Protected Route: User must be logged in to talk to Clarity AI
 
-router.route("/command").post( processCommand);
+router.route("/command").post( protect, processCommand);
 
 export default router;

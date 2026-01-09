@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 const taskSchema = new mongoose.Schema({
@@ -48,6 +49,17 @@ const taskSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+
+  actualDuration: {
+    type: Number
+  },
+
+  createdBy: {
+    type: String,
+    enum: ["manual", "ai"],
+    default: "manual"
+  },
+
   // Learning: We update this after the user says "That took 30 mins"
   actualDuration: {
     type: Number, // In minutes
