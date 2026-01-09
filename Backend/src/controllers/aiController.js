@@ -12,7 +12,8 @@ dayjs.extend(timezone);
 
 export const processCommand = asyncHandler(async (req, res) => {
   const { command, localTime } = req.body;
-  const userId = req.user.id; 
+  console.log("Received command:", command);
+  const userId = "69536fb9d7c5a01ac7c502f7"; 
 
   const user = await User.findById(userId);
   const userTz = user.timezone || "Asia/Kolkata";
@@ -91,6 +92,6 @@ export const processCommand = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(userId, { $set: { pendingTask: null } });
     return res.status(200).json(new ApiResponse(200, { message: "No problem, I've cleared that suggestion." }, "Rejected"));
   }
-  
+  console.log("AI Response:", ApiResponse);
   return res.status(200).json(new ApiResponse(200, aiResponse, "Processed"));
 });

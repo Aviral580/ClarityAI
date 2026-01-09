@@ -34,30 +34,22 @@ export default function Login() {
       const result = await response.json();
 
       if (response.ok) {
-        // // ✅ 1. SAVE TOKEN TO LOCAL STORAGE
-        // // Your backend returns: { data: { accessToken: "..." }, message: "..." }
-        // if (result.data && result.data.accessToken) {
-        //   localStorage.setItem("accessToken", result.data.accessToken);
-
-        //   // Optional: Save user details too if you want to display name immediately
-        //   // localStorage.setItem("user", JSON.stringify(result.data.user)); 
-        // }
-
+       
         setFeedback({
           type: "success",
           msg: result.message || "Login Successful!",
         });
 
-        // ✅ 2. REDIRECT
+       
         setTimeout(() => {
-          // Check the user object returned from backend
+          
           const user = result.data.user;
 
           if (user.isOnboarded) {
-            // User has finished setup -> Go to App
-            navigate('/dashboard'); // Using React Router's navigate instead of window.location
+            
+            navigate('/dashboard'); 
           } else {
-            // User is new -> Go to Onboarding
+            
             navigate('/onboarding');
           }
         }, 1500);

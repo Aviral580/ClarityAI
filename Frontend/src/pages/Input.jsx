@@ -44,25 +44,50 @@ export default function Input() {
     }
   };
 
-  // 5. Handle Submit
-  const handleSubmit = async () => {
-    const finalContent = inputText || transcript;
-    if (!finalContent.trim()) return;
-    
-    SpeechRecognition.stopListening();
-    setIsProcessing(true);
-    
-    // Simulate API Processing
+const handleSubmit = async () => {
+  const finalContent = inputText || transcript;
+  if (!finalContent.trim()) return;
+
+  SpeechRecognition.stopListening();
+  setIsProcessing(true);
+
+  try {
+    const response = await fetch("http://localhost:5000/api/v1/ai/command", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        command: finalContent, // RAW TEXT (JSON, NOT formdata)
+      }),
+      credentials: "include", // keep if you use cookies/JWT
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to submit");
+    }
+
+    // OPTIONAL: read response if backend returns something
+    // const data = await response.json();
+
+    // ✅ Success UI
+    setShowSuccess(true);
+
+    // ✅ CLEAR EVERYTHING
+    setInputText("");
+    resetTranscript();
+  } catch (error) {
+    console.error("Submit error:", error);
+  } finally {
+    setIsProcessing(false);
+
+    // Hide success after 3 sec
     setTimeout(() => {
-      setIsProcessing(false);
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        setInputText('');
-        resetTranscript(); 
-      }, 3000);
-    }, 2000);
-  };
+      setShowSuccess(false);
+    }, 3000);
+  }
+};
+
 
   // 6. Define Suggestions List (moved up here!)
   const suggestions = [
