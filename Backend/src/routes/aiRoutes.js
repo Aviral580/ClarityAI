@@ -1,20 +1,9 @@
-import express from 'express';
-import { 
-    getTasks, 
-    createTask, 
-    updateTask, 
-    deleteTask 
-} from "../controllers/task.controller.js";
-import { protect } from '../middlewares/auth.js';
+import { Router } from "express";
+import { processCommand } from "../controllers/";
+import { protect } from "../middlewares/auth.js"; // Your existing auth middleware
 
-const router = express.Router();
+const router = Router();
 
-// Route: /api/tasks/
-router.get('/', protect, getTasks);
-router.post('/', protect, createTask);
+// Protected Route: User must be logged in to talk to Clarity AI
 
-// Route: /api/tasks/:id
-router.put('/:id', protect, updateTask);
-router.delete('/:id', protect, deleteTask);
-
-export default router;
+router.route("/command").post(protect, processCommand);
