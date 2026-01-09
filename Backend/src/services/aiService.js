@@ -61,8 +61,8 @@ export const analyzeUserCommand = async (command, userContext) => {
           "title": "String",
           "category": "String",
           "priority": "High/Medium/Low",
-          "startTime": "ISO String (Estimated)",
-          "endTime": "ISO String (Estimated)",
+          "startTime": "ISO 8601 UTC String (Estimated)",
+          "endTime": "ISO 8601 UTC String (Estimated)",
           "durationMinutes": Number,
           "isFixed": Boolean (True for meetings, False for solo work)
         }

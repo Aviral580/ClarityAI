@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { processCommand } from "../controllers/";
+import { processCommand } from "../controllers/aicontroller.js";
 import { protect } from "../middlewares/auth.js"; // Your existing auth middleware
 
 const router = Router();
@@ -7,3 +7,5 @@ const router = Router();
 // Protected Route: User must be logged in to talk to Clarity AI
 
 router.route("/command").post(protect, processCommand);
+
+export default router;
