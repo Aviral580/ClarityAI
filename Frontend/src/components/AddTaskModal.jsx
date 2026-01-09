@@ -6,32 +6,62 @@ import { useTheme } from './ThemeContext';
 export default function AddTaskModal({ isOpen, onClose, onSave, initialData }) {
     const { isDark } = useTheme();
 
-    const formatDateForInput = (dateObj) => {
-        if (!dateObj) return '';
-        return new Date(dateObj).toISOString().split('T')[0];
+    // 🔴 FIX: Use Local Time instead of UTC (toISOString)
+    const formatLocalDate = (date) => {
+        if (!date) return '';
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // Helper to get current time string (HH:MM)
+    const getCurrentTime = () => {
+        const now = new Date();
+        return now.toTimeString().slice(0, 5); // Returns "14:30" format
     };
 
     const [formData, setFormData] = useState({
         title: '',
-        date: formatDateForInput(new Date()), // Scheduled Date
-        dueDate: formatDateForInput(new Date()),
-        time: '09:00',
+        date: formatLocalDate(new Date()),    // Defaults to Today (Local)
+        dueDate: formatLocalDate(new Date()), // Defaults to Today (Local)
+        time: getCurrentTime(),               // Defaults to Now
         duration: 1,
         priority: 'medium',
         category: 'work',
-        note: ''
+        description: ''
     });
 
     useEffect(() => {
-        if (initialData) {
-            setFormData(prev => ({
-                ...prev,
-                ...initialData,
-                date: initialData.date ? formatDateForInput(initialData.date) : prev.date,
-                dueDate: initialData.dueDate ? formatDateForInput(initialData.dueDate) : formatDateForInput(new Date())
-            }));
+        if (isOpen) {
+            if (initialData) {
+                // Editing an existing slot/task
+                setFormData(prev => ({
+                    ...prev,
+                    ...initialData,
+                    title: initialData.title || '',
+                    date: initialData.date ? formatLocalDate(initialData.date) : formatLocalDate(new Date()),
+                    // If no due date exists, default to the start date
+                    dueDate: initialData.dueDate ? formatLocalDate(initialData.dueDate) : (initialData.date ? formatLocalDate(initialData.date) : formatLocalDate(new Date())),
+                    time: initialData.time || getCurrentTime(),
+                    description: initialData.description || initialData.resource?.description || ''
+                }));
+            } else {
+                // Creating a brand new task from scratch
+                setFormData({
+                    title: '',
+                    date: formatLocalDate(new Date()),
+                    dueDate: formatLocalDate(new Date()),
+                    time: getCurrentTime(),
+                    duration: 1,
+                    priority: 'medium',
+                    category: 'work',
+                    description: ''
+                });
+            }
         }
-    }, [initialData]);
+    }, [initialData, isOpen]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -148,13 +178,13 @@ export default function AddTaskModal({ isOpen, onClose, onSave, initialData }) {
                             </div>
                         </div>
 
-                        {/* Notes */}
+                        {/* descriptions */}
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">Notes</label>
+                            <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wider">descriptions</label>
                             <div className="relative">
                                 <AlignLeft size={16} className="absolute left-3 top-3.5 text-gray-400" />
                                 <textarea
-                                    name="note" rows="2" value={formData.note} onChange={handleChange} placeholder="Details..."
+                                    name="description" rows="2" value={formData.description} onChange={handleChange} placeholder="Details..."
                                     className={`w-full pl-10 p-3 rounded-xl border outline-none resize-none ${isDark ? 'bg-slate-800 border-slate-700 text-white' : 'bg-gray-50 border-gray-200'}`}
                                 />
                             </div>

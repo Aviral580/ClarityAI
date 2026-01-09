@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import "regenerator-runtime/runtime"; 
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Mic, MicOff, Send, Sparkles, MessageSquare,
-  CheckCircle2, Loader2, Wand2
+  Mic, MicOff, Sparkles, MessageSquare,
+  CheckCircle2, Loader2, Wand2, AlertCircle
 } from 'lucide-react';
 import GradientBackground from '../components/GradientBackground';
 import AnimatedSection from '../components/AnimatedSection';
@@ -11,37 +13,58 @@ import { useTheme } from '../components/ThemeContext';
 
 export default function Input() {
   const { isDark } = useTheme();
-  const [isListening, setIsListening] = useState(false);
+  
+  // 1. Setup Speech Hook
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable
+  } = useSpeechRecognition();
+
+  // 2. Local State
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // 3. Sync Transcript to Input
+  useEffect(() => {
+    if (transcript) {
+        setInputText(transcript);
+    }
+  }, [transcript]);
+
+  // 4. Start/Stop Handlers
   const handleVoiceToggle = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      // Simulate voice input
-      setTimeout(() => {
-        setInputText('Schedule a meeting with the design team tomorrow at 2pm to discuss the new project proposal');
-        setIsListening(false);
-      }, 3000);
+    if (listening) {
+      SpeechRecognition.stopListening();
+    } else {
+      SpeechRecognition.startListening({ continuous: true, language: 'en-IN' });
     }
   };
 
+  // 5. Handle Submit
   const handleSubmit = async () => {
-    if (!inputText.trim()) return;
+    const finalContent = inputText || transcript;
+    if (!finalContent.trim()) return;
     
+    SpeechRecognition.stopListening();
     setIsProcessing(true);
-    // Simulate AI processing
+    
+    // Simulate API Processing
     setTimeout(() => {
       setIsProcessing(false);
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
         setInputText('');
+        resetTranscript(); 
       }, 3000);
     }, 2000);
   };
 
+  // 6. Define Suggestions List (moved up here!)
   const suggestions = [
     'Schedule team meeting for tomorrow afternoon',
     'Remind me to call the dentist at 3pm',
@@ -49,10 +72,14 @@ export default function Input() {
     'Add gym session every weekday at 6pm',
   ];
 
+  if (!browserSupportsSpeechRecognition) {
+    return <div className="text-center p-10 text-white">Browser not supported. Please use Google Chrome.</div>;
+  }
+
   return (
     <GradientBackground variant="primary">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Header */}
+        
         <AnimatedSection className="text-center mb-12">
           <motion.div
             initial={{ scale: 0 }}
@@ -70,29 +97,43 @@ export default function Input() {
           <p className={`text-lg ${
             isDark ? 'text-slate-300' : 'text-slate-600'
           }`}>
-            Speak or type naturally — ClarityAI will understand and schedule for you.
+            Speak naturally — ClarityAI will handle the rest.
           </p>
         </AnimatedSection>
 
-        {/* Voice Input Button */}
-        <AnimatedSection delay={0.1} className="mb-8">
-          <div className="flex justify-center">
+        {/* Microphone Error Alert */}
+        <AnimatePresence>
+            {!isMicrophoneAvailable && (
+                <motion.div 
+                    initial={{ opacity: 0, y: -10 }} 
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 max-w-md mx-auto"
+                >
+                    <AlertCircle className="w-5 h-5" />
+                    <p className="text-sm font-medium">Microphone access denied. Please allow permission.</p>
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+        {/* Voice Button */}
+        <AnimatedSection delay={0.1} className="mb-4">
+          <div className="flex flex-col items-center justify-center">
             <motion.button
               onClick={handleVoiceToggle}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`relative w-32 h-32 rounded-full flex items-center justify-center transition-all ${
-                isListening
+                listening
                   ? 'bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg shadow-rose-500/40'
                   : isDark
                     ? 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30'
                     : 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30'
               }`}
             >
-              {isListening ? (
+              {listening ? (
                 <>
                   <MicOff className="w-12 h-12 text-white relative z-10" />
-                  {/* Pulsing rings */}
                   <motion.div
                     className="absolute inset-0 rounded-full bg-rose-500"
                     animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
@@ -108,40 +149,42 @@ export default function Input() {
                 <Mic className="w-12 h-12 text-white" />
               )}
             </motion.button>
+            <p className={`text-center mt-4 text-sm ${
+                isDark ? 'text-slate-400' : 'text-slate-500'
+            }`}>
+                {listening ? 'Listening... Speak now!' : 'Tap to speak'}
+            </p>
           </div>
-          <p className={`text-center mt-4 text-sm ${
-            isDark ? 'text-slate-400' : 'text-slate-500'
-          }`}>
-            {isListening ? 'Listening... Tap to stop' : 'Tap to speak'}
-          </p>
         </AnimatedSection>
 
-        {/* Sound Wave Animation */}
-        <AnimatePresence>
-          {isListening && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="flex justify-center gap-1 mb-8"
-            >
-              {[...Array(20)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="w-1.5 bg-gradient-to-t from-indigo-500 to-purple-500 rounded-full"
-                  animate={{
-                    height: [8, Math.random() * 40 + 16, 8],
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 0.5,
-                    delay: i * 0.05,
-                  }}
-                />
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Waves Animation */}
+        <div className="h-12 w-full flex items-center justify-center mb-4">
+             <AnimatePresence mode="wait">
+                {listening && (
+                    <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex justify-center gap-1"
+                    >
+                    {[...Array(20)].map((_, i) => (
+                        <motion.div
+                        key={i}
+                        className="w-1.5 bg-gradient-to-t from-indigo-500 to-purple-500 rounded-full"
+                        animate={{
+                            height: [8, Math.random() * 40 + 16, 8],
+                        }}
+                        transition={{
+                            repeat: Infinity,
+                            duration: 0.5,
+                            delay: i * 0.05,
+                        }}
+                        />
+                    ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
 
         {/* Text Input */}
         <AnimatedSection delay={0.2}>
@@ -152,20 +195,17 @@ export default function Input() {
           }`}>
             <div className="flex items-start gap-4 p-6">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                isDark
-                  ? 'bg-white/10'
-                  : 'bg-indigo-50'
+                isDark ? 'bg-white/10' : 'bg-indigo-50'
               }`}>
                 <MessageSquare className="w-5 h-5 text-indigo-500" />
               </div>
+              
               <textarea
-                value={inputText}
+                value={listening ? transcript : inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Type your task or schedule here... e.g., 'Schedule a meeting with John tomorrow at 3pm'"
+                placeholder="Type or speak naturally..."
                 className={`flex-1 min-h-[120px] resize-none bg-transparent outline-none text-lg ${
-                  isDark
-                    ? 'text-white placeholder-slate-500'
-                    : 'text-slate-800 placeholder-slate-400'
+                  isDark ? 'text-white placeholder-slate-500' : 'text-slate-800 placeholder-slate-400'
                 }`}
               />
             </div>
@@ -173,40 +213,32 @@ export default function Input() {
             <div className={`flex items-center justify-between px-6 py-4 border-t ${
               isDark ? 'border-white/10' : 'border-slate-100'
             }`}>
-              <p className={`text-sm ${
-                isDark ? 'text-slate-400' : 'text-slate-500'
-              }`}>
-                {inputText.length} characters
+              <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                {(inputText || transcript).length} characters
               </p>
               <motion.button
                 onClick={handleSubmit}
-                disabled={!inputText.trim() || isProcessing}
+                disabled={(!inputText && !transcript) || isProcessing}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-                  inputText.trim() && !isProcessing
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                  (inputText || transcript) && !isProcessing
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
                     : isDark
                       ? 'bg-white/10 text-slate-500 cursor-not-allowed'
                       : 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 }`}
               >
                 {isProcessing ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Processing...
-                  </>
+                  <><Loader2 className="w-5 h-5 animate-spin" />Processing...</>
                 ) : (
-                  <>
-                    <Wand2 className="w-5 h-5" />
-                    Schedule with AI
-                  </>
+                  <><Wand2 className="w-5 h-5" />Schedule with AI</>
                 )}
               </motion.button>
             </div>
           </div>
         </AnimatedSection>
-
+        
         {/* Success Message */}
         <AnimatePresence>
           {showSuccess && (
@@ -232,7 +264,7 @@ export default function Input() {
                 <p className={`text-sm ${
                   isDark ? 'text-slate-300' : 'text-slate-600'
                 }`}>
-                  "Design team meeting" added for tomorrow at 2:00 PM
+                  Check your calendar to see the changes.
                 </p>
               </div>
             </motion.div>
@@ -250,7 +282,10 @@ export default function Input() {
             {suggestions.map((suggestion, index) => (
               <motion.button
                 key={index}
-                onClick={() => setInputText(suggestion)}
+                onClick={() => {
+                    setInputText(suggestion);
+                    resetTranscript();
+                }}
                 whileHover={{ scale: 1.02, x: 4 }}
                 whileTap={{ scale: 0.98 }}
                 className={`text-left p-4 rounded-xl transition-colors ${

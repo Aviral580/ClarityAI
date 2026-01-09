@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema({
     whatsappNumber: { type: String }, // For WhatsApp notifications
     timezone: { type: String, default: "Asia/Kolkata" },
 
+    isOnboarded: {
+        type: Boolean,
+        default: false
+    },
     onboardingData: {
         workHours: { 
             start: { type: String, default: "09:00" }, 
