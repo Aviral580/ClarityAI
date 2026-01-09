@@ -115,7 +115,7 @@ export default function Signup() {
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md"
         >
-          <div className="mb-10">
+          <div className="pt-10 mb-10">
             <h1
               className={`text-4xl font-black mb-3 ${
                 isDark ? "text-white" : "text-slate-900"
