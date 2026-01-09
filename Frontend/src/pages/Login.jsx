@@ -40,7 +40,7 @@ export default function Login() {
       // 6. UPDATE GLOBAL STATE
       // This makes the app know you are logged in immediately
       if (result.data && result.data.user) {
-         login(result.data.user);
+        login(result.data.user);
       }
 
       // 7. Redirect
@@ -69,7 +69,7 @@ export default function Login() {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center px-4 transition-colors duration-500 ${isDark ? "bg-slate-950" : "bg-slate-50"
+      className={`min-h-screen flex items-center justify-center px-4 py-20 transition-colors duration-500 ${isDark ? "bg-slate-950" : "bg-slate-50"
         }`}
     >
       {/* Background Decorative Blobs */}
