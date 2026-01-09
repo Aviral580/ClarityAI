@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
- // <--- THIS MAGIC LINE FIXES THE KEY LOADING
+// <--- THIS MAGIC LINE FIXES THE KEY LOADING
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize Gemini
@@ -16,11 +16,20 @@ const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 export const analyzeUserCommand = async (command, userContext) => {
   const { currentTime, userHabits } = userContext;
 
+  // 1. Format the date clearly so the AI doesn't mix up Month/Day
+  const humanReadableDate = new Date(currentTime).toLocaleDateString("en-US", {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }); // Result: "Friday, January 9, 2026"
+
   const systemPrompt = `
     You are Clarity AI, an elite Executive Assistant.
     
     CURRENT CONTEXT:
-    - Current Time: ${new Date(currentTime).toLocaleString()}
+    - Current Time: ${humanReadableDate} (${new Date(currentTime).toISOString()})
+    - IMPORTANT: Today is ${humanReadableDate}. If the user says "today", schedule it for this specific date. Do not swap month and day.
     - User's Sleep Window: ${userContext.sleepTime || "23:00 to 07:00"}
     - Work Hours: ${userContext.workHours || "09:00 to 17:00"}
     - Learning Data (Avg Durations): ${JSON.stringify(userContext.categoryDurations || {})}
@@ -52,8 +61,8 @@ export const analyzeUserCommand = async (command, userContext) => {
           "title": "String",
           "category": "String",
           "priority": "High/Medium/Low",
-          "startTime": "ISO String (Estimated)",
-          "endTime": "ISO String (Estimated)",
+          "startTime": "ISO 8601 UTC String (Estimated)",
+          "endTime": "ISO 8601 UTC String (Estimated)",
           "durationMinutes": Number,
           "isFixed": Boolean (True for meetings, False for solo work)
         }
@@ -67,17 +76,17 @@ export const analyzeUserCommand = async (command, userContext) => {
     const result = await model.generateContent(systemPrompt);
     const response = await result.response;
     const text = response.text();
-    
+
     // Clean up if Gemini adds markdown code blocks
     const jsonStr = text.replace(/```json|```/g, "").trim();
-    
+
     return JSON.parse(jsonStr);
   } catch (error) {
     console.error("AI Service Error:", error);
     // Fallback if AI fails
-    return { 
-      intent: "ERROR", 
-      responseMessage: "I'm having trouble thinking right now. Please try again." 
+    return {
+      intent: "ERROR",
+      responseMessage: "I'm having trouble thinking right now. Please try again."
     };
   }
 };

@@ -1,31 +1,37 @@
-import { ApiError } from "../utils/ApiError.js";
-import { asyncHandler } from "../utils/AsyncHandler.js";
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 import { User } from "../models/User.js";
 
-export const verifyJWT = asyncHandler(async(req, _, next) => {
+export const protect = async (req, res, next) => {
     try {
-        // 1. Get token from header or cookie
-        const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
-        
+        const token = req.cookies?.accessToken || req.header('Authorization')?.split(' ')[1];
+
         if (!token) {
-            throw new ApiError(401, "Unauthorized request: No token provided");
+            return res.status(401).json({ 
+                success: false, 
+                message: 'No token, authorization denied' 
+            });
         }
 
-        // 2. Decode token
-        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        // 2. Verify the token using your Secret Key
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-        // 3. Find user in DB (Critical: Exclude password/refresh token)
-        const user = await User.findById(decodedToken?._id || decodedToken?.id).select("-password -refreshToken");
+        // 3. Find the user and attach to the request
+        // Using .select("-password") ensures sensitive data isn't passed around
+        const user = await User.findById(decoded?._id).select("-password -refreshToken");
 
         if (!user) {
-            throw new ApiError(401, "Invalid Access Token: User not found");
+            return res.status(401).json({ 
+                success: false, 
+                message: 'User no longer exists' 
+            });
         }
 
-        // 4. Attach user to request object
-        req.user = user;
+        req.user = user; 
         next();
-    } catch (error) {
-        throw new ApiError(401, error?.message || "Invalid access token");
+    } catch (err) {
+        return res.status(401).json({ 
+            success: false, 
+            message: 'Token is not valid or expired' 
+        });
     }
-});
+};

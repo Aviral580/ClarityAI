@@ -20,12 +20,14 @@ export const saveAiTasks = async (userId, aiTasks, originalCommand) => {
         const newTask = await Task.create({
             userId,
             title: taskData.title,
-            category: taskData.category,
+            category: taskData.category.toLowerCase(),
             priority: taskData.priority,
-            startTime: taskData.startTime,
-            endTime: taskData.endTime,
+            start: taskData.startTime,
+            end: taskData.endTime,
             isFixed: taskData.isFixed,
-            originalCommand: originalCommand
+            originalCommand: originalCommand,
+            createdBy: "ai", // Good practice to track source
+            status: "pending" 
         });
         savedTasks.push(newTask);
     }

@@ -7,44 +7,76 @@ const taskSchema = new mongoose.Schema({
     ref: "User",
     required: true
   },
+
   title: {
     type: String,
     required: true,
-    index: true // Faster search
+    index: true
   },
-  // We store the raw input so the AI can "remember" the context later
+
   originalCommand: {
     type: String,
   },
+
+  description: {
+    type: String,
+    default: ""
+  },
+
   category: {
     type: String,
-    enum: ["Work", "Personal", "Health", "Learning", "General"],
-    default: "General"
+    enum: ["work", "personal", "health", "learning"],
+    default: "work"
   },
+
   priority: {
-    type: String,
-    enum: ["High", "Medium", "Low"],
+    type: mongoose.Schema.Types.Mixed, 
+    enum: ["High", "Medium", "Low", 1, 2, 3],
     default: "Medium"
   },
-  // Time Blocking Logic
-  startTime: {
+
+  // Calendar Fields used by Controller
+  start: {
     type: Date,
-    required: true
+    default: null
   },
-  endTime: {
+
+  end: {
     type: Date,
-    required: true
+    default: null
   },
+
+  date: {
+    type: Date,
+    default: new Date()
+  },
+
+  dueDate: {
+    type: Date,
+    default: new Date()
+  },
+
+  duration: {
+    type: Number // in minutes
+  },
+
   isFixed: {
     type: Boolean,
-    default: false, // True for Meetings/Classes (Hard to move), False for Study/Gym (Easy to move)
+    default: false
   },
+
   status: {
     type: String,
-    enum: ["Pending", "Completed", "Rescheduled", "Migrated"],
+    enum: [
+      "Completed",
+      "rescheduled",
+      "pending",
+      "scheduled",
+      "skipped"
+    ],
     default: "Pending"
   },
-  // Stress Tracking: If this number is high, User is stressed
+
   rescheduleCount: {
     type: Number,
     default: 0
@@ -60,10 +92,6 @@ const taskSchema = new mongoose.Schema({
     default: "manual"
   }
 
-  // Learning: We update this after the user says "That took 30 mins"
-  actualDuration: {
-    type: Number, // In minutes
-  }
 }, { timestamps: true });
 
 export const Task = mongoose.model("Task", taskSchema);
