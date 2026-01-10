@@ -24,71 +24,85 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-   const fetchTasks = useCallback(async () => {
-    try {
-      const start = moment().startOf("day").toDate();
-      const end = moment().endOf("day").toDate();
+const fetchTasks = useCallback(async () => {
+  try {
+    const start = moment().startOf("day").toDate();
+    const end = moment().endOf("day").toDate();
 
-      const response = await taskService.fetchTasks(start, end);
-      const data = response.data || response;
+    const response = await taskService.fetchTasks(start, end);
+    const data = response.data || response;
 
-      const formattedTasks = data.map((task) => {
-        const startDate = task.start ? new Date(task.start) : null;
-        const endDate = task.end ? new Date(task.end) : null;
+    const formattedTasks = data.map((task) => {
+      const startDate = task.start ? new Date(task.start) : null;
+      const endDate = task.end ? new Date(task.end) : null;
 
-        return {
-          id: task._id,
-          title: task.title,
-          category: task.category?.toLowerCase() || "work",
-          priority: task.priority?.toLowerCase() || "medium",
-          completed: task.status === "completed",
+      return {
+        id: task._id,
+        title: task.title || "Untitled Task",
+        category: task.category?.toLowerCase() || "work",
+        priority: task.priority?.toLowerCase() || "medium",
+        completed: task.status?.toLowerCase() === "completed", // ✅ ensure lowercase comparison
 
-          /* ✅ CORRECT LOCAL TIME DISPLAY */
-          time: startDate
-            ? startDate.toLocaleTimeString(undefined, {
-                hour: "numeric",
-                minute: "2-digit",
-                hour12: true,
-              })
+        // Correct local time display
+        time: startDate
+          ? startDate.toLocaleTimeString(undefined, {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            })
+          : "N/A",
+
+        // Correct duration
+        duration:
+          startDate && endDate
+            ? `${Math.round((endDate.getTime() - startDate.getTime()) / 60000)} min`
             : "N/A",
+      };
+    });
 
-          /* ✅ CORRECT DURATION */
-          duration:
-            startDate && endDate
-              ? `${Math.round(
-                  (endDate.getTime() - startDate.getTime()) / 60000
-                )} min`
-              : "N/A",
-        };
-      });
+    setTasks(formattedTasks);
+  } catch (error) {
+    console.error("Failed to fetch dashboard tasks:", error);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
-      setTasks(formattedTasks);
-    } catch (error) {
-      console.error("Failed to fetch dashboard tasks:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
-  
-  const toggleTask = (id) => {
+
+  const toggleTask = async (taskId, currentStatus) => {
+    // Optimistic UI update
     setTasks((prev) =>
       prev.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
+        task.id === taskId ? { ...task, completed: !currentStatus } : task
       )
     );
+
+    try {
+      await taskService.updateTask(taskId, {
+        status: currentStatus ? "pending" : "Completed",
+      });
+    } catch (error) {
+      console.error("Failed to update task status:", error);
+
+      // Rollback if API fails
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId ? { ...task, completed: currentStatus } : task
+        )
+      );
+    }
   };
 
-  /* -------------------------------------------------------------------------- */
-  /* UI Helpers & Calculations                                                  */
-  /* -------------------------------------------------------------------------- */
-  const completedCount = tasks.filter((t) => t.completed).length;
-  const progressPercent = tasks.length > 0 
-    ? Math.round((completedCount / tasks.length) * 100) 
-    : 0;
+// Count completed tasks
+const completedCount = tasks.reduce((count, task) => count + (task.completed ? 1 : 0), 0);
+
+// Calculate progress percentage
+const progressPercent = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -114,7 +128,7 @@ export default function Dashboard() {
     personal: "🏠",
     health: "🏃",
     education: "🎓",
-    general: "📝"
+    general: "📝",
   };
 
   /* -------------------------------------------------------------------------- */
@@ -124,10 +138,12 @@ export default function Dashboard() {
     return (
       <GradientBackground variant="subtle">
         <div className="h-screen flex items-center justify-center">
-           <div className="flex flex-col items-center gap-4">
-             <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-             <p className={isDark ? "text-slate-400" : "text-slate-600"}>Loading Dashboard...</p>
-           </div>
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <p className={isDark ? "text-slate-400" : "text-slate-600"}>
+              Loading Dashboard...
+            </p>
+          </div>
         </div>
       </GradientBackground>
     );
@@ -315,9 +331,13 @@ export default function Dashboard() {
 
                 <div className="divide-y divide-slate-100 dark:divide-white/10">
                   {tasks.length === 0 ? (
-                      <div className={`p-6 text-center ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-                        No tasks scheduled for today.
-                      </div>
+                    <div
+                      className={`p-6 text-center ${
+                        isDark ? "text-slate-400" : "text-slate-500"
+                      }`}
+                    >
+                      No tasks scheduled for today.
+                    </div>
                   ) : (
                     tasks.map((task, index) => (
                       <motion.div
@@ -330,7 +350,7 @@ export default function Dashboard() {
                         }`}
                       >
                         <motion.button
-                          onClick={() => toggleTask(task.id)}
+                          onClick={() => toggleTask(task.id, task.completed)}
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
@@ -348,7 +368,8 @@ export default function Dashboard() {
 
                         <div
                           className={`w-1 h-10 rounded-full bg-gradient-to-b ${
-                            priorityColors[task.priority] || priorityColors.medium
+                            priorityColors[task.priority] ||
+                            priorityColors.medium
                           }`}
                         />
 

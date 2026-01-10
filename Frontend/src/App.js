@@ -21,14 +21,21 @@ import Settings from './pages/Settings';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import OnboardingPage from './pages/OnboardingPage'; // 1. Import Onboarding Page
+import OnboardingPage from './pages/OnboardingPage'; 
+import { useLocation } from 'react-router-dom';
 
 export default function App() {
+  const location = useLocation();
+
+  // Routes where Navbar should NOT appear
+  const noNavbarRoutes = ["/signup", "/onboarding", "/login"];
+
+  const showNavbar = !noNavbarRoutes.includes(location.pathname);
   return (
       <div className="min-h-screen flex flex-col">
 
         <AuthProvider>
-            <Navbar />
+            {showNavbar && <Navbar />}
             {/* Page Content */}
             <main className="flex-1">
               <Routes>

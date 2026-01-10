@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, ArrowRight, Github, Loader2 } from "lucide-react";
+import { Mail, Lock, ArrowRight, Github, Loader2, ArrowLeft } from "lucide-react"; // Added ArrowLeft
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../components/ThemeContext";
-import apiClient from "../services/apiClient"; // 1. Import your smart client
-import { useAuth } from "../context/AuthContext"; // 2. Import Auth Context
+import apiClient from "../services/apiClient";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const { isDark } = useTheme();
-  const { login } = useAuth(); // 3. Get the login function from context
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState({ type: "", msg: "" });
   const navigate = useNavigate();
@@ -18,32 +18,24 @@ export default function Login() {
     setLoading(true);
     setFeedback({ type: "", msg: "" });
 
-    // 4. Construct data matching your backend expectations
-    // Ensure these keys (identifier/email, password) match what your controller expects
     const formData = {
-      identifier: e.target.identifier.value, // or 'username' depending on backend
+      identifier: e.target.identifier.value,
       password: e.target.password.value,
     };
 
     try {
-      // 5. Use apiClient instead of fetch
-      // This automatically handles credentials/cookies
       const response = await apiClient.post("/auth/login", formData);
-
-      const result = response.data; // Axios puts body in .data
+      const result = response.data;
 
       setFeedback({
         type: "success",
         msg: result.message || "Login Successful!",
       });
 
-      // 6. UPDATE GLOBAL STATE
-      // This makes the app know you are logged in immediately
       if (result.data && result.data.user) {
         login(result.data.user);
       }
 
-      // 7. Redirect
       setTimeout(() => {
         const user = result.data.user;
         if (user?.isOnboarded) {
@@ -55,7 +47,6 @@ export default function Login() {
 
     } catch (error) {
       console.error("Login Error:", error);
-      // Axios stores the response error in error.response
       const errorMsg = error.response?.data?.message || "Connection failed";
       
       setFeedback({
@@ -69,9 +60,23 @@ export default function Login() {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center px-4 py-20 transition-colors duration-500 ${isDark ? "bg-slate-950" : "bg-slate-50"
+      className={`min-h-screen flex items-center justify-center px-4 py-20 transition-colors duration-500 relative ${isDark ? "bg-slate-950" : "bg-slate-50"
         }`}
     >
+      {/* --- NEW BACK BUTTON --- */}
+      <Link
+        to="/"
+        className={`absolute top-6 left-6 md:top-10 md:left-10 flex items-center gap-2 text-sm font-semibold transition-colors z-10 ${
+          isDark 
+            ? "text-slate-400 hover:text-white" 
+            : "text-slate-500 hover:text-indigo-600"
+        }`}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </Link>
+      {/* ----------------------- */}
+
       {/* Background Decorative Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div

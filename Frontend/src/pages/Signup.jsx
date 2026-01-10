@@ -1,6 +1,7 @@
 import React, { useState } from "react"; 
 import { motion, AnimatePresence } from "framer-motion"; 
-import { Mail, Lock, CheckCircle2, Sparkles, Loader2 } from "lucide-react"; 
+// Added ArrowLeft to imports
+import { Mail, Lock, CheckCircle2, Sparkles, Loader2, ArrowLeft } from "lucide-react"; 
 import { Link, useNavigate } from "react-router-dom"; 
 import { useTheme } from "../components/ThemeContext";
 
@@ -59,11 +60,11 @@ export default function Signup() {
         isDark ? "bg-slate-950" : "bg-white"
       }`}
     >
-     
+      
       <div className="hidden lg:flex w-1/2 bg-indigo-600 relative overflow-hidden flex-col justify-center px-20">
         <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-indigo-600 to-purple-700" />
 
-       
+        
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -109,7 +110,23 @@ export default function Signup() {
       </div>
 
       {/* Right Side: Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+      {/* Added 'relative' here to position the back button correctly */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+        
+        {/* --- NEW BACK BUTTON --- */}
+        <Link
+          to="/"
+          className={`absolute top-6 left-6 flex items-center gap-2 text-sm font-semibold transition-colors ${
+            isDark 
+              ? "text-slate-400 hover:text-white" 
+              : "text-slate-500 hover:text-indigo-600"
+          }`}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Link>
+        {/* ----------------------- */}
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
