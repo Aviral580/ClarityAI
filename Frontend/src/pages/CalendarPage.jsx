@@ -13,23 +13,17 @@ import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
 
-/* -------------------------------------------------------------------------- */
-/* Helper: Translate MongoDB Data -> Calendar Data                            */
-/* -------------------------------------------------------------------------- */
 const formatTaskForCalendar = (task) => {
   const pMap = { 1: 'high', 2: 'medium', 3: 'low' };
 
-  // 🔴 CRITICAL FIX: Strip the 'Z' to treat time as "Floating/Local"
-  // DB: "2026-01-09T17:00:00.000Z" -> becomes "2026-01-09T17:00:00.000"
-  // Browser parses this as 5:00 PM Local Time (ignoring the +5:30 offset logic)
-  const startString = task.start ? new Date(task.start).toISOString().replace("Z", "") : null;
-  const endString = task.end ? new Date(task.end).toISOString().replace("Z", "") : null;
-
   return {
-    id: task._id, 
+    id: task._id,
     title: task.title,
-    start: new Date(startString), 
-    end: new Date(endString),     
+
+    // ✅ CORRECT: Let JS handle timezone conversion
+    start: task.start ? new Date(task.start) : null,
+    end: task.end ? new Date(task.end) : null,
+
     resource: {
       priority: pMap[task.priority] || 'medium',
       category: task.category || 'work',
@@ -37,6 +31,7 @@ const formatTaskForCalendar = (task) => {
     }
   };
 };
+
 
 /* -------------------------------------------------------------------------- */
 /* Component: CalendarEvent (Visuals)                                         */

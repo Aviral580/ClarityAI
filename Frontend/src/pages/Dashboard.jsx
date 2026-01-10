@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useTheme } from "../components/ThemeContext";
+import moment from "moment";
+import { useTheme } from "../components/ThemeContext"; // Assuming you have this
 import {
   Plus,
   Calendar,
   CheckCircle2,
-  Circle,
   Clock,
   TrendingUp,
   Sparkles,
@@ -17,68 +17,78 @@ import {
 import GradientBackground from "../components/GradientBackground";
 import AnimatedSection from "../components/AnimatedSection";
 import CTAButton from "../components/CTAButton";
+import { taskService } from "../services/taskService";
 
 export default function Dashboard() {
   const { isDark } = useTheme();
-  const [tasks, setTasks] = useState([
-    {
-      id: 1,
-      title: "Team standup meeting",
-      time: "9:00 AM",
-      duration: "30 min",
-      completed: true,
-      priority: "medium",
-      category: "work",
-    },
-    {
-      id: 2,
-      title: "Review quarterly report",
-      time: "10:00 AM",
-      duration: "2 hours",
-      completed: true,
-      priority: "high",
-      category: "work",
-    },
-    {
-      id: 3,
-      title: "Lunch break",
-      time: "12:00 PM",
-      duration: "1 hour",
-      completed: true,
-      priority: "low",
-      category: "personal",
-    },
-    {
-      id: 4,
-      title: "Client presentation",
-      time: "2:00 PM",
-      duration: "1 hour",
-      completed: false,
-      priority: "high",
-      category: "work",
-    },
-    {
-      id: 5,
-      title: "Email follow-ups",
-      time: "3:30 PM",
-      duration: "45 min",
-      completed: false,
-      priority: "medium",
-      category: "work",
-    },
-    {
-      id: 6,
-      title: "Gym session",
-      time: "5:30 PM",
-      duration: "1 hour",
-      completed: false,
-      priority: "medium",
-      category: "health",
-    },
-  ]);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+   const fetchTasks = useCallback(async () => {
+    try {
+      const start = moment().startOf("day").toDate();
+      const end = moment().endOf("day").toDate();
+
+      const response = await taskService.fetchTasks(start, end);
+      const data = response.data || response;
+
+      const formattedTasks = data.map((task) => {
+        const startDate = task.start ? new Date(task.start) : null;
+        const endDate = task.end ? new Date(task.end) : null;
+
+        return {
+          id: task._id,
+          title: task.title,
+          category: task.category?.toLowerCase() || "work",
+          priority: task.priority?.toLowerCase() || "medium",
+          completed: task.status === "completed",
+
+          /* ✅ CORRECT LOCAL TIME DISPLAY */
+          time: startDate
+            ? startDate.toLocaleTimeString(undefined, {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              })
+            : "N/A",
+
+          /* ✅ CORRECT DURATION */
+          duration:
+            startDate && endDate
+              ? `${Math.round(
+                  (endDate.getTime() - startDate.getTime()) / 60000
+                )} min`
+              : "N/A",
+        };
+      });
+
+      setTasks(formattedTasks);
+    } catch (error) {
+      console.error("Failed to fetch dashboard tasks:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+  
+  const toggleTask = (id) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /* UI Helpers & Calculations                                                  */
+  /* -------------------------------------------------------------------------- */
   const completedCount = tasks.filter((t) => t.completed).length;
-  const progressPercent = Math.round((completedCount / tasks.length) * 100);
+  const progressPercent = tasks.length > 0 
+    ? Math.round((completedCount / tasks.length) * 100) 
+    : 0;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -93,14 +103,6 @@ export default function Dashboard() {
     day: "numeric",
   });
 
-  const toggleTask = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
-  };
-
   const priorityColors = {
     high: "from-rose-500 to-pink-600",
     medium: "from-indigo-500 to-purple-600",
@@ -111,8 +113,29 @@ export default function Dashboard() {
     work: "💼",
     personal: "🏠",
     health: "🏃",
+    education: "🎓",
+    general: "📝"
   };
 
+  /* -------------------------------------------------------------------------- */
+  /* Loading State                                                              */
+  /* -------------------------------------------------------------------------- */
+  if (loading) {
+    return (
+      <GradientBackground variant="subtle">
+        <div className="h-screen flex items-center justify-center">
+           <div className="flex flex-col items-center gap-4">
+             <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+             <p className={isDark ? "text-slate-400" : "text-slate-600"}>Loading Dashboard...</p>
+           </div>
+        </div>
+      </GradientBackground>
+    );
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /* Exact UI Render                                                            */
+  /* -------------------------------------------------------------------------- */
   return (
     <GradientBackground variant="subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
@@ -291,81 +314,87 @@ export default function Dashboard() {
                 </div>
 
                 <div className="divide-y divide-slate-100 dark:divide-white/10">
-                  {tasks.map((task, index) => (
-                    <motion.div
-                      key={task.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.4 + index * 0.05 }}
-                      className={`flex items-center gap-4 p-4 transition-colors ${
-                        isDark ? "hover:bg-white/5" : "hover:bg-slate-50"
-                      }`}
-                    >
-                      <motion.button
-                        onClick={() => toggleTask(task.id)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                          task.completed
-                            ? "bg-emerald-500 border-emerald-500"
-                            : isDark
-                            ? "border-slate-600 hover:border-emerald-500"
-                            : "border-slate-300 hover:border-emerald-500"
+                  {tasks.length === 0 ? (
+                      <div className={`p-6 text-center ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                        No tasks scheduled for today.
+                      </div>
+                  ) : (
+                    tasks.map((task, index) => (
+                      <motion.div
+                        key={task.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.4 + index * 0.05 }}
+                        className={`flex items-center gap-4 p-4 transition-colors ${
+                          isDark ? "hover:bg-white/5" : "hover:bg-slate-50"
                         }`}
                       >
-                        {task.completed && (
-                          <CheckCircle2 className="w-4 h-4 text-white" />
-                        )}
-                      </motion.button>
-
-                      <div
-                        className={`w-1 h-10 rounded-full bg-gradient-to-b ${
-                          priorityColors[task.priority]
-                        }`}
-                      />
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span>{categoryIcons[task.category]}</span>
-                          <p
-                            className={`font-medium truncate ${
-                              task.completed
-                                ? isDark
-                                  ? "text-slate-500 line-through"
-                                  : "text-slate-400 line-through"
-                                : isDark
-                                ? "text-white"
-                                : "text-slate-800"
-                            }`}
-                          >
-                            {task.title}
-                          </p>
-                        </div>
-                        <div
-                          className={`flex items-center gap-2 text-sm ${
-                            isDark ? "text-slate-400" : "text-slate-500"
+                        <motion.button
+                          onClick={() => toggleTask(task.id)}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            task.completed
+                              ? "bg-emerald-500 border-emerald-500"
+                              : isDark
+                              ? "border-slate-600 hover:border-emerald-500"
+                              : "border-slate-300 hover:border-emerald-500"
                           }`}
                         >
-                          <Clock className="w-3 h-3" />
-                          <span>{task.time}</span>
-                          <span>•</span>
-                          <span>{task.duration}</span>
-                        </div>
-                      </div>
+                          {task.completed && (
+                            <CheckCircle2 className="w-4 h-4 text-white" />
+                          )}
+                        </motion.button>
 
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full font-medium ${
-                          task.priority === "high"
-                            ? "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"
-                            : task.priority === "medium"
-                            ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400"
-                            : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
-                        }`}
-                      >
-                        {task.priority}
-                      </span>
-                    </motion.div>
-                  ))}
+                        <div
+                          className={`w-1 h-10 rounded-full bg-gradient-to-b ${
+                            priorityColors[task.priority] || priorityColors.medium
+                          }`}
+                        />
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span>{categoryIcons[task.category] || "📝"}</span>
+                            <p
+                              className={`font-medium truncate ${
+                                task.completed
+                                  ? isDark
+                                    ? "text-slate-500 line-through"
+                                    : "text-slate-400 line-through"
+                                  : isDark
+                                  ? "text-white"
+                                  : "text-slate-800"
+                              }`}
+                            >
+                              {task.title}
+                            </p>
+                          </div>
+                          <div
+                            className={`flex items-center gap-2 text-sm ${
+                              isDark ? "text-slate-400" : "text-slate-500"
+                            }`}
+                          >
+                            <Clock className="w-3 h-3" />
+                            <span>{task.time}</span>
+                            <span>•</span>
+                            <span>{task.duration}</span>
+                          </div>
+                        </div>
+
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full font-medium ${
+                            task.priority === "high"
+                              ? "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400"
+                              : task.priority === "medium"
+                              ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400"
+                              : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400"
+                          }`}
+                        >
+                          {task.priority}
+                        </span>
+                      </motion.div>
+                    ))
+                  )}
                 </div>
               </div>
             </AnimatedSection>

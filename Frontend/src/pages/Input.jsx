@@ -13,7 +13,10 @@ import { useTheme } from '../components/ThemeContext';
 
 export default function Input() {
   const { isDark } = useTheme();
-  
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); // "success" | "error"
+  const [showToast, setShowToast] = useState(false);
+
   // 1. Setup Speech Hook
   const {
     transcript,
@@ -26,7 +29,6 @@ export default function Input() {
   // 2. Local State
   const [inputText, setInputText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
   // 3. Sync Transcript to Input
   useEffect(() => {
@@ -44,27 +46,54 @@ export default function Input() {
     }
   };
 
-  // 5. Handle Submit
   const handleSubmit = async () => {
     const finalContent = inputText || transcript;
     if (!finalContent.trim()) return;
-    
+
     SpeechRecognition.stopListening();
     setIsProcessing(true);
-    
-    // Simulate API Processing
-    setTimeout(() => {
+
+    try {
+      const response = await fetch("http://localhost:5000/api/v1/ai/command", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ command: finalContent }),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      console.log("Backend Response:", data.data.message);
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Failed to submit");
+      }
+
+      setMessage(data?.data?.message || "Task scheduled successfully");
+      setMessageType("success");
+      setShowToast(true);
+
+      setInputText("");
+      resetTranscript();
+    } catch (error) {
+      console.error("Submit error:", error);
+      setMessage(error.message || "Something went wrong");
+      setMessageType("error");
+      setShowToast(true);
+    } finally {
       setIsProcessing(false);
-      setShowSuccess(true);
+
+      // Auto hide toast after 4 sec
       setTimeout(() => {
-        setShowSuccess(false);
-        setInputText('');
-        resetTranscript(); 
-      }, 3000);
-    }, 2000);
+        setShowToast(false);
+        setMessage("");
+        setMessageType("");
+      }, 6000);
+    }
   };
 
-  // 6. Define Suggestions List (moved up here!)
+  // 6. Define Suggestions List
   const suggestions = [
     'Schedule team meeting for tomorrow afternoon',
     'Remind me to call the dentist at 3pm',
@@ -78,8 +107,33 @@ export default function Input() {
 
   return (
     <GradientBackground variant="primary">
+
+      {/* --- TOP TOAST ALERT --- */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ y: -80, opacity: 0 }}
+            animate={{ y: 20, opacity: 1 }}
+            exit={{ y: -80, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className={`fixed top-0 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-lg rounded-2xl shadow-lg p-4 flex items-center gap-4 ${
+              messageType === "success"
+                ? "bg-emerald-500/95 text-white"
+                : "bg-red-500/95 text-white"
+            }`}
+          >
+            {messageType === "success" ? (
+              <CheckCircle2 className="w-6 h-6" />
+            ) : (
+              <AlertCircle className="w-6 h-6" />
+            )}
+            <p className="flex-1 text-sm sm:text-base font-medium">{message}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
+
         <AnimatedSection className="text-center mb-12">
           <motion.div
             initial={{ scale: 0 }}
@@ -103,17 +157,17 @@ export default function Input() {
 
         {/* Microphone Error Alert */}
         <AnimatePresence>
-            {!isMicrophoneAvailable && (
-                <motion.div 
-                    initial={{ opacity: 0, y: -10 }} 
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 max-w-md mx-auto"
-                >
-                    <AlertCircle className="w-5 h-5" />
-                    <p className="text-sm font-medium">Microphone access denied. Please allow permission.</p>
-                </motion.div>
-            )}
+          {!isMicrophoneAvailable && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 max-w-md mx-auto"
+            >
+              <AlertCircle className="w-5 h-5" />
+              <p className="text-sm font-medium">Microphone access denied. Please allow permission.</p>
+            </motion.div>
+          )}
         </AnimatePresence>
 
         {/* Voice Button */}
@@ -159,31 +213,31 @@ export default function Input() {
 
         {/* Waves Animation */}
         <div className="h-12 w-full flex items-center justify-center mb-4">
-             <AnimatePresence mode="wait">
-                {listening && (
-                    <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex justify-center gap-1"
-                    >
-                    {[...Array(20)].map((_, i) => (
-                        <motion.div
-                        key={i}
-                        className="w-1.5 bg-gradient-to-t from-indigo-500 to-purple-500 rounded-full"
-                        animate={{
-                            height: [8, Math.random() * 40 + 16, 8],
-                        }}
-                        transition={{
-                            repeat: Infinity,
-                            duration: 0.5,
-                            delay: i * 0.05,
-                        }}
-                        />
-                    ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
+          <AnimatePresence mode="wait">
+            {listening && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex justify-center gap-1"
+              >
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-1.5 bg-gradient-to-t from-indigo-500 to-purple-500 rounded-full"
+                    animate={{
+                        height: [8, Math.random() * 40 + 16, 8],
+                    }}
+                    transition={{
+                        repeat: Infinity,
+                        duration: 0.5,
+                        delay: i * 0.05,
+                    }}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Text Input */}
@@ -239,38 +293,6 @@ export default function Input() {
           </div>
         </AnimatedSection>
         
-        {/* Success Message */}
-        <AnimatePresence>
-          {showSuccess && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={`mt-6 p-6 rounded-2xl flex items-center gap-4 ${
-                isDark
-                  ? 'bg-emerald-500/20 border border-emerald-500/30'
-                  : 'bg-emerald-50 border border-emerald-200'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className={`font-semibold ${
-                  isDark ? 'text-white' : 'text-slate-800'
-                }`}>
-                  Task Scheduled Successfully!
-                </h3>
-                <p className={`text-sm ${
-                  isDark ? 'text-slate-300' : 'text-slate-600'
-                }`}>
-                  Check your calendar to see the changes.
-                </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Suggestions */}
         <AnimatedSection delay={0.3} className="mt-12">
           <h3 className={`text-center font-semibold mb-6 ${
@@ -309,6 +331,7 @@ export default function Input() {
             View Your Calendar
           </CTAButton>
         </AnimatedSection>
+
       </div>
     </GradientBackground>
   );

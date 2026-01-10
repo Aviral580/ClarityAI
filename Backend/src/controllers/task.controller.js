@@ -7,6 +7,7 @@ import { ApiError } from "../utils/ApiError.js";
 export const getTasks = asyncHandler(async (req, res) => {
     const { start, end } = req.query;
     const userId = req.user._id;
+    console.log("User ID:", userId);   
 
     if (!start || !end) {
         throw new ApiError(400, "Start and End dates are required");
@@ -18,6 +19,7 @@ export const getTasks = asyncHandler(async (req, res) => {
         end: { $gt: new Date(start) },
         status: { $ne: "skipped" }
     });
+    console.log("Fetched Tasks:", tasks);
 
     return res.status(200).json(
         new ApiResponse(200, tasks, "Tasks fetched successfully")

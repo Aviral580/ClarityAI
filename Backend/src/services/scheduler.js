@@ -1,12 +1,14 @@
 import { Task } from "../models/Task.js";
 
 export const checkConflicts = async (userId, startTime, endTime) => {
+    console.log("checking the function ");
+
     const overlappingTask = await Task.findOne({
         userId,
         status: { $ne: "Completed" },
         $and: [
-            { startTime: { $lt: new Date(endTime) } },
-            { endTime: { $gt: new Date(startTime) } }
+            { start: { $lt: new Date(endTime) } },
+            { end: { $gt: new Date(startTime) } }
         ]
     });
 
@@ -61,4 +63,23 @@ export const findAlternativeSlots = async (userId, date, durationMinutes) => {
     }
 
     return possibleStartTime; 
+};
+
+export const bumpTask = async (userId, taskToMove) => {
+    const duration = (new Date(taskToMove.endTime) - new Date(taskToMove.startTime)) / (1000 * 60);
+    
+    // Find a new slot starting from its current end time
+    const newSlot = await findAlternativeSlots(userId, taskToMove.endTime, duration);
+    
+    const updatedTask = await Task.findByIdAndUpdate(
+        taskToMove._id,
+        {
+            startTime: newSlot,
+            endTime: new Date(new Date(newSlot).getTime() + duration * 60000),
+            rescheduleCount: (taskToMove.rescheduleCount || 0) + 1
+        },
+        { new: true }
+    );
+
+    return updatedTask;
 };
